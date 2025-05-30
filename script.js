@@ -10,12 +10,12 @@ let currentHue = 200, currentSaturation = 70, currentLightness = 70;
 let currentTransparency = 0;
 let currentWireframe = false;
 let miniScenes = [];
-let explodeGroup = null; // Group containing exploded faces
+let explodeGroup = null;
 
 function init() {
   const container = document.getElementById('renderCanvas');
   const width = window.innerWidth;
-  const height = window.innerHeight - 120; // Account for footer
+  const height = window.innerHeight - 120;
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(width, height);
@@ -48,20 +48,15 @@ function init() {
   });
   updateMaterial();
 
-  // Initialize mini preview scenes
   initMiniScenes();
-
-  // Initialize main solid (octahedron by default)
   updateMainSolid();
 
-  // Dark mode toggle
   document.getElementById('darkModeToggle').addEventListener('click', () => {
     isDarkMode = !isDarkMode;
     document.body.classList.toggle('dark', isDarkMode);
     scene.background = isDarkMode ? new THREE.Color(0x111111) : new THREE.Color(0xf5f5f5);
   });
 
-  // Controls
   document.getElementById('hue').addEventListener('input', updateMaterial);
   document.getElementById('saturation').addEventListener('input', updateMaterial);
   document.getElementById('lightness').addEventListener('input', updateMaterial);
@@ -75,7 +70,6 @@ function init() {
   document.getElementById('lightZ').addEventListener('input', updateLight);
   document.getElementById('wireframe').addEventListener('change', updateWireframe);
 
-  // Modal controls
   const controlsModal = document.getElementById('controlsModal');
   const hideControlsBtn = document.getElementById('hideControlsBtn');
   const showControlsBtn = document.getElementById('showControlsBtn');
@@ -93,11 +87,11 @@ function init() {
 
 function initMiniScenes() {
   const solidTypes = [
-    { type: 'tetrahedron', geo: () => new THREE.TetrahedronGeometry(1, 0), color: 0x00a8ff },
-    { type: 'cube', geo: () => new THREE.BoxGeometry(1.8, 1.8, 1.8), color: 0x4cd137 },
-    { type: 'octahedron', geo: () => new THREE.OctahedronGeometry(1.2, 0), color: 0xe84118 },
-    { type: 'dodecahedron', geo: () => new THREE.DodecahedronGeometry(1, 0), color: 0x9c88ff },
-    { type: 'icosahedron', geo: () => new THREE.IcosahedronGeometry(1, 0), color: 0xfbc531 }
+    { type: 'tetrahedron', geo: () => new THREE.TetrahedronGeometry(0.8, 0), color: 0x00a8ff },
+    { type: 'cube', geo: () => new THREE.BoxGeometry(1.2, 1.2, 1.2), color: 0x4cd137 },
+    { type: 'octahedron', geo: () => new THREE.OctahedronGeometry(0.8, 0), color: 0xe84118 },
+    { type: 'dodecahedron', geo: () => new THREE.DodecahedronGeometry(0.8, 0), color: 0x9c88ff },
+    { type: 'icosahedron', geo: () => new THREE.IcosahedronGeometry(0.8, 0), color: 0xfbc531 }
   ];
 
   document.querySelectorAll('.solid-wrapper').forEach((wrapper, i) => {
@@ -114,7 +108,7 @@ function initMiniScenes() {
     miniScene.background = null;
 
     const miniCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
-    miniCamera.position.z = 3;
+    miniCamera.position.z = 2;
 
     const miniLight = new THREE.DirectionalLight(0xffffff, 1);
     miniLight.position.set(1, 1, 1);
@@ -176,21 +170,19 @@ function updateWireframe() {
   }
 }
 
-// Helper: Split geometry into faces and return a group
 function explodeGeometry(geometry, explodeFactor = 0) {
   const group = new THREE.Group();
   group.position.set(0, 1, 0);
 
-  // Clone so we can scale the geometry
-  const geo = geometry.clone();
-  geo.scale(currentSize, currentSize, currentSize);
+  // Clone and scale the geometry for size
+  geometry = geometry.clone();
+  geometry.scale(currentSize, currentSize, currentSize);
 
   // Convert to non-indexed to get per-face vertices
-  const indexedGeo = new THREE.BufferGeometry().fromGeometry(new THREE.Geometry().fromBufferGeometry(geo));
+  const indexedGeo = new THREE.BufferGeometry().fromGeometry(new THREE.Geometry().fromBufferGeometry(geometry));
   const position = indexedGeo.attributes.position;
   const index = indexedGeo.index;
 
-  // For each face, create a triangle and move it along its normal
   for (let i = 0; i < index.count; i += 3) {
     const a = index.getX(i);
     const b = index.getX(i + 1);
@@ -201,4 +193,88 @@ function explodeGeometry(geometry, explodeFactor = 0) {
     const v3 = new THREE.Vector3().fromBufferAttribute(position, c);
 
     const faceGeo = new THREE.BufferGeometry();
-    faceGeo.setAttribute('position', new THREE
+    faceGeo.setAttribute('position', new THREE.Float32BufferAttribute([
+      v1.x, v1.y, v1.z,
+      v2.x, v2.y, v2.z,
+      v3.x, v3.y, v3.z
+    ], 3));
+    faceGeo.computeVertexNormals();
+
+    const faceNormal = new THREE.Vector3();
+    faceNormal.subVectors(v2, v1).cross(new THREE.Vector3().subVectors(v3, v1)).normalize();
+
+    const faceCenter = new THREE.Vector3();
+    faceCenter.add(v1).add(v2).add(v3).divideScalar(3);
+
+    const faceMesh = new THREE.Mesh(faceGeo, mainSolidMaterial.clone());
+    faceMesh.position.copy(faceCenter);
+    faceMesh.userData.normal = faceNormal;
+    faceMesh.userData.originalPosition = faceCenter.clone();
+    faceMesh.position.add(faceNormal.multiplyScalar(explodeFactor * 0.5));
+
+    group.add(faceMesh);
+  }
+
+  return group;
+}
+
+function updateMainSolid() {
+  currentSize = parseFloat(document.getElementById('size').value);
+  if (explodeGroup) scene.remove(explodeGroup);
+
+  let geometry;
+  if (mainSolidType === 'tetrahedron') geometry = new THREE.TetrahedronGeometry(1, 0);
+  else if (mainSolidType === 'cube') geometry = new THREE.BoxGeometry(1.8, 1.8, 1.8);
+  else if (mainSolidType === 'octahedron') geometry = new THREE.OctahedronGeometry(1.2, 0);
+  else if (mainSolidType === 'dodecahedron') geometry = new THREE.DodecahedronGeometry(1, 0);
+  else if (mainSolidType === 'icosahedron') geometry = new THREE.IcosahedronGeometry(1, 0);
+
+  explodeGroup = explodeGeometry(geometry, 0);
+  scene.add(explodeGroup);
+  updateExplode();
+}
+
+function updateExplode() {
+  currentExplode = parseFloat(document.getElementById('explode').value);
+  if (!explodeGroup) return;
+
+  explodeGroup.children.forEach(child => {
+    const normal = child.userData.normal;
+    const originalPos = child.userData.originalPosition;
+    if (normal && originalPos) {
+      child.position.copy(originalPos);
+      child.position.add(normal.clone().multiplyScalar(currentExplode * 0.5));
+    }
+  });
+}
+
+function updateSpeed() {
+  currentRotationSpeed = parseFloat(document.getElementById('rotationSpeed').value);
+  currentRotationDirection = parseInt(document.getElementById('rotationDirection').value);
+}
+
+function updateLight() {
+  const x = parseFloat(document.getElementById('lightX').value);
+  const y = parseFloat(document.getElementById('lightY').value);
+  const z = parseFloat(document.getElementById('lightZ').value);
+  directionalLight.position.set(x, y, z);
+}
+
+function onWindowResize() {
+  const width = window.innerWidth;
+  const height = window.innerHeight - 120;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  if (explodeGroup) {
+    explodeGroup.rotation.y += currentRotationSpeed * currentRotationDirection;
+  }
+  renderer.render(scene, camera);
+}
+
+init();
