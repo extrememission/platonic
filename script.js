@@ -1,5 +1,4 @@
-let scene, camera, renderer, controls, mainSolid, directionalLight;
-let isDarkMode = false;
+let scene, camera, renderer, controls, directionalLight;
 let mainSolidType = 'octahedron';
 let mainSolidMaterial;
 let currentExplode = 0;
@@ -11,6 +10,7 @@ let currentTransparency = 0;
 let currentWireframe = false;
 let miniScenes = [];
 let explodeGroup = null;
+let isDarkMode = false;
 
 function init() {
   const container = document.getElementById('renderCanvas');
@@ -94,7 +94,8 @@ function initMiniScenes() {
     { type: 'icosahedron', geo: () => new THREE.IcosahedronGeometry(0.8, 0), color: 0xfbc531 }
   ];
 
-  document.querySelectorAll('.solid-wrapper').forEach((wrapper, i) => {
+  const wrappers = document.querySelectorAll('.solid-wrapper');
+  wrappers.forEach((wrapper, i) => {
     const type = solidTypes[i];
     const canvas = wrapper.querySelector('.solid-preview');
     const miniRenderer = new THREE.WebGLRenderer({
@@ -128,6 +129,7 @@ function initMiniScenes() {
 
     miniScenes.push({ scene: miniScene, camera: miniCamera, mesh: miniMesh, renderer: miniRenderer });
 
+    // Click handler for mini solid
     wrapper.addEventListener('click', () => {
       mainSolidType = type.type;
       updateMainSolid();
@@ -174,23 +176,18 @@ function explodeGeometry(geometry, explodeFactor = 0) {
   const group = new THREE.Group();
   group.position.set(0, 1, 0);
 
-  // Clone and scale the geometry for size
   geometry = geometry.clone();
   geometry.scale(currentSize, currentSize, currentSize);
 
   // Convert to non-indexed to get per-face vertices
-  const indexedGeo = new THREE.BufferGeometry().fromGeometry(new THREE.Geometry().fromBufferGeometry(geometry));
-  const position = indexedGeo.attributes.position;
-  const index = indexedGeo.index;
+  const geo = geometry.toNonIndexed();
+  const pos = geo.attributes.position;
+  const faceCount = pos.count / 3;
 
-  for (let i = 0; i < index.count; i += 3) {
-    const a = index.getX(i);
-    const b = index.getX(i + 1);
-    const c = index.getX(i + 2);
-
-    const v1 = new THREE.Vector3().fromBufferAttribute(position, a);
-    const v2 = new THREE.Vector3().fromBufferAttribute(position, b);
-    const v3 = new THREE.Vector3().fromBufferAttribute(position, c);
+  for (let i = 0; i < faceCount; i++) {
+    const v1 = new THREE.Vector3().fromBufferAttribute(pos, i * 3 + 0);
+    const v2 = new THREE.Vector3().fromBufferAttribute(pos, i * 3 + 1);
+    const v3 = new THREE.Vector3().fromBufferAttribute(pos, i * 3 + 2);
 
     const faceGeo = new THREE.BufferGeometry();
     faceGeo.setAttribute('position', new THREE.Float32BufferAttribute([
@@ -210,7 +207,7 @@ function explodeGeometry(geometry, explodeFactor = 0) {
     faceMesh.position.copy(faceCenter);
     faceMesh.userData.normal = faceNormal;
     faceMesh.userData.originalPosition = faceCenter.clone();
-    faceMesh.position.add(faceNormal.multiplyScalar(explodeFactor * 0.5));
+    faceMesh.position.add(faceNormal.clone().multiplyScalar(explodeFactor * 0.5));
 
     group.add(faceMesh);
   }
@@ -229,9 +226,8 @@ function updateMainSolid() {
   else if (mainSolidType === 'dodecahedron') geometry = new THREE.DodecahedronGeometry(1, 0);
   else if (mainSolidType === 'icosahedron') geometry = new THREE.IcosahedronGeometry(1, 0);
 
-  explodeGroup = explodeGeometry(geometry, 0);
+  explodeGroup = explodeGeometry(geometry, currentExplode);
   scene.add(explodeGroup);
-  updateExplode();
 }
 
 function updateExplode() {
