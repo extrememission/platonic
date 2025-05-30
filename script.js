@@ -1,88 +1,198 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Platonic Solids Viewer (Three.js)</title>
-  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div id="renderCanvas"></div>
-  <div id="darkModeToggle">
-    <i class="material-icons">brightness_4</i>
-  </div>
-  <div id="controls">
-    <div id="colorControls">
-      <div>
-        <label for="hue">Hue</label>
-        <input type="range" id="hue" min="0" max="360" value="200">
-      </div>
-      <div>
-        <label for="saturation">Saturation</label>
-        <input type="range" id="saturation" min="0" max="100" value="70">
-      </div>
-      <div>
-        <label for="lightness">Lightness</label>
-        <input type="range" id="lightness" min="0" max="100" value="70">
-      </div>
-      <div>
-        <label for="size">Size</label>
-        <input type="range" id="size" min="0.5" max="3" step="0.1" value="1">
-      </div>
-      <div>
-        <label for="rotationSpeed">Rotation Speed</label>
-        <input type="range" id="rotationSpeed" min="0" max="0.05" step="0.005" value="0.01">
-      </div>
-      <div>
-        <label for="rotationDirection">Rotation Direction</label>
-        <select id="rotationDirection">
-          <option value="1">Clockwise</option>
-          <option value="-1">Counter-clockwise</option>
-        </select>
-      </div>
-      <div>
-        <label for="explode">Explode</label>
-        <input type="range" id="explode" min="0" max="2" step="0.1" value="0">
-      </div>
-      <div>
-        <label for="lightX">Light X</label>
-        <input type="range" id="lightX" min="-2" max="2" step="0.1" value="1">
-      </div>
-      <div>
-        <label for="lightY">Light Y</label>
-        <input type="range" id="lightY" min="-2" max="2" step="0.1" value="1">
-      </div>
-      <div>
-        <label for="lightZ">Light Z</label>
-        <input type="range" id="lightZ" min="-2" max="2" step="0.1" value="1">
-      </div>
-    </div>
-  </div>
-  <footer id="solidSelector">
-    <div class="solid-wrapper" data-type="tetrahedron">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Tetrahedron</span>
-    </div>
-    <div class="solid-wrapper" data-type="cube">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Cube</span>
-    </div>
-    <div class="solid-wrapper" data-type="octahedron">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Octahedron</span>
-    </div>
-    <div class="solid-wrapper" data-type="dodecahedron">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Dodecahedron</span>
-    </div>
-    <div class="solid-wrapper" data-type="icosahedron">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Icosahedron</span>
-    </div>
-  </footer>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
-  <script src="script.js"></script>
-</body>
-</html>
+let scene, camera, renderer, controls, mainSolid, directionalLight;
+let isDarkMode = false;
+let mainSolidType = 'octahedron';
+let mainSolidMaterial;
+let currentExplode = 0;
+let currentRotationSpeed = 0.01;
+let currentRotationDirection = 1;
+let currentSize = 1;
+let currentHue = 200, currentSaturation = 70, currentLightness = 70;
+
+// Mini preview scenes
+const miniScenes = [];
+
+// Initialize the main scene
+function init() {
+  const container = document.getElementById('renderCanvas');
+  const width = window.innerWidth;
+  const height = window.innerHeight - 120; // Account for footer
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(width, height);
+  container.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf5f5f5);
+
+  camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+  camera.position.set(0, 2, 8);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+
+  directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  directionalLight.position.set(1, 1, 1);
+  scene.add(directionalLight);
+
+  mainSolidMaterial = new THREE.MeshStandardMaterial({
+    roughness: 0.3,
+    metalness: 0.5,
+    flatShading: false
+  });
+  updateMaterial();
+
+  // Initialize mini preview scenes
+  initMiniScenes();
+
+  // Initialize main solid (octahedron by default)
+  updateMainSolid();
+
+  // Dark mode toggle
+  document.getElementById('darkModeToggle').addEventListener('click', () => {
+    isDarkMode = !isDarkMode;
+    document.body.classList.toggle('dark', isDarkMode);
+    scene.background = isDarkMode ? new THREE.Color(0x111111) : new THREE.Color(0xf5f5f5);
+  });
+
+  // Controls
+  document.getElementById('hue').addEventListener('input', updateMaterial);
+  document.getElementById('saturation').addEventListener('input', updateMaterial);
+  document.getElementById('lightness').addEventListener('input', updateMaterial);
+  document.getElementById('size').addEventListener('input', updateMainSolid);
+  document.getElementById('rotationSpeed').addEventListener('input', updateSpeed);
+  document.getElementById('rotationDirection').addEventListener('change', updateSpeed);
+  document.getElementById('explode').addEventListener('input', updateExplode);
+  document.getElementById('lightX').addEventListener('input', updateLight);
+  document.getElementById('lightY').addEventListener('input', updateLight);
+  document.getElementById('lightZ').addEventListener('input', updateLight);
+
+  window.addEventListener('resize', onWindowResize);
+  animate();
+}
+
+function initMiniScenes() {
+  const solidTypes = [
+    { type: 'tetrahedron', geo: () => new THREE.TetrahedronGeometry(1, 0), color: 0x00a8ff },
+    { type: 'cube', geo: () => new THREE.BoxGeometry(1.8, 1.8, 1.8), color: 0x4cd137 },
+    { type: 'octahedron', geo: () => new THREE.OctahedronGeometry(1.2, 0), color: 0xe84118 },
+    { type: 'dodecahedron', geo: () => new THREE.DodecahedronGeometry(1, 0), color: 0x9c88ff },
+    { type: 'icosahedron', geo: () => new THREE.IcosahedronGeometry(1, 0), color: 0xfbc531 }
+  ];
+
+  document.querySelectorAll('.solid-wrapper').forEach((wrapper, i) => {
+    const type = solidTypes[i];
+    const canvas = wrapper.querySelector('.solid-preview');
+    const miniRenderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true
+    });
+    miniRenderer.setSize(canvas.width, canvas.height);
+
+    const miniScene = new THREE.Scene();
+    miniScene.background = null;
+
+    const miniCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
+    miniCamera.position.z = 3;
+
+    const miniLight = new THREE.DirectionalLight(0xffffff, 1);
+    miniLight.position.set(1, 1, 1);
+    miniScene.add(miniLight);
+    miniScene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+    const miniMesh = new THREE.Mesh(
+      type.geo(),
+      new THREE.MeshStandardMaterial({
+        color: type.color,
+        roughness: 0.3,
+        metalness: 0.5,
+        flatShading: false
+      })
+    );
+    miniScene.add(miniMesh);
+
+    miniScenes.push({ scene: miniScene, camera: miniCamera, mesh: miniMesh, renderer: miniRenderer });
+
+    wrapper.addEventListener('click', () => {
+      mainSolidType = type.type;
+      updateMainSolid();
+    });
+  });
+}
+
+function animateMiniScenes() {
+  miniScenes.forEach(({ scene, camera, mesh, renderer }) => {
+    mesh.rotation.y += 0.01;
+    renderer.render(scene, camera);
+  });
+  requestAnimationFrame(animateMiniScenes);
+}
+animateMiniScenes();
+
+function updateMaterial() {
+  currentHue = parseInt(document.getElementById('hue').value);
+  currentSaturation = parseInt(document.getElementById('saturation').value);
+  currentLightness = parseInt(document.getElementById('lightness').value);
+  const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
+  mainSolidMaterial.color = color;
+  if (mainSolid) mainSolid.material = mainSolidMaterial;
+}
+
+function updateMainSolid() {
+  currentSize = parseFloat(document.getElementById('size').value);
+  if (mainSolid) scene.remove(mainSolid);
+
+  let geometry;
+  if (mainSolidType === 'tetrahedron') geometry = new THREE.TetrahedronGeometry(1, 0);
+  else if (mainSolidType === 'cube') geometry = new THREE.BoxGeometry(1.8, 1.8, 1.8);
+  else if (mainSolidType === 'octahedron') geometry = new THREE.OctahedronGeometry(1.2, 0);
+  else if (mainSolidType === 'dodecahedron') geometry = new THREE.DodecahedronGeometry(1, 0);
+  else if (mainSolidType === 'icosahedron') geometry = new THREE.IcosahedronGeometry(1, 0);
+
+  mainSolid = new THREE.Mesh(geometry, mainSolidMaterial);
+  mainSolid.scale.set(currentSize, currentSize, currentSize);
+  mainSolid.position.set(0, 1, 0);
+  scene.add(mainSolid);
+  updateExplode();
+}
+
+function updateExplode() {
+  currentExplode = parseFloat(document.getElementById('explode').value);
+  if (!mainSolid) return;
+  mainSolid.scale.set(currentSize * (1 + currentExplode), currentSize * (1 + currentExplode), currentSize * (1 + currentExplode));
+}
+
+function updateSpeed() {
+  currentRotationSpeed = parseFloat(document.getElementById('rotationSpeed').value);
+  currentRotationDirection = parseInt(document.getElementById('rotationDirection').value);
+}
+
+function updateLight() {
+  const x = parseFloat(document.getElementById('lightX').value);
+  const y = parseFloat(document.getElementById('lightY').value);
+  const z = parseFloat(document.getElementById('lightZ').value);
+  directionalLight.position.set(x, y, z);
+}
+
+function onWindowResize() {
+  const width = window.innerWidth;
+  const height = window.innerHeight - 120;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  if (mainSolid) {
+    mainSolid.rotation.y += currentRotationSpeed * currentRotationDirection;
+  }
+  renderer.render(scene, camera);
+}
+
+init();
