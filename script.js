@@ -1,6 +1,188 @@
+// Polyhedra data inspired by tesseralis/polyhedra-viewer (https://github.com/tesseralis/polyhedra-viewer)
+const SOLIDS = {
+  tetrahedron: {
+    name: "Tetrahedron",
+    symbol: "T",
+    vertices: [
+      [1, 1, 1],
+      [-1, -1, 1],
+      [-1, 1, -1],
+      [1, -1, -1]
+    ],
+    faces: [
+      [0, 1, 2],
+      [0, 3, 1],
+      [0, 2, 3],
+      [1, 3, 2]
+    ],
+    info: `
+<strong>Tetrahedron | T</strong><br>
+Platonic solid<br><br>
+<b>Vertices</b><br>4<br>
+<b>Edges</b><br>6<br>
+<b>Faces</b><br>4<br>
+<b>Vertex configuration</b><br>3.3.3<br>
+<b>Faces by type</b><br>4 triangles<br>
+<b>Volume</b><br>≈0.118s³<br>
+<b>Surface area</b><br>≈1.732s²<br>
+<b>Sphericity</b><br>≈0.671<br>
+<b>Symmetry</b><br>Full tetrahedral, Td<br>
+<b>Order</b><br>24<br>
+<b>Properties</b><br>deltahedron<br>
+<b>Also known as</b><br>triangular pyramid, digonal antiprism, disphenoid
+`
+  },
+  cube: {
+    name: "Cube",
+    symbol: "C",
+    vertices: [
+      [-1, -1, -1],
+      [-1, -1, 1],
+      [-1, 1, -1],
+      [-1, 1, 1],
+      [1, -1, -1],
+      [1, -1, 1],
+      [1, 1, -1],
+      [1, 1, 1]
+    ],
+    faces: [
+      [0,1,3,2],
+      [4,6,7,5],
+      [0,4,5,1],
+      [2,3,7,6],
+      [0,2,6,4],
+      [1,5,7,3]
+    ],
+    info: `
+<strong>Cube | C</strong><br>
+Platonic solid<br><br>
+<b>Vertices</b><br>8<br>
+<b>Edges</b><br>12<br>
+<b>Faces</b><br>6<br>
+<b>Vertex configuration</b><br>4.4.4<br>
+<b>Faces by type</b><br>6 squares<br>
+<b>Volume</b><br>s³<br>
+<b>Surface area</b><br>6s²<br>
+<b>Sphericity</b><br>≈0.806<br>
+<b>Symmetry</b><br>Full octahedral, Oh<br>
+<b>Order</b><br>48<br>
+<b>Properties</b><br>zonohedron, regular hexahedron<br>
+<b>Also known as</b><br>regular hexahedron
+`
+  },
+  octahedron: {
+    name: "Octahedron",
+    symbol: "O",
+    vertices: [
+      [1, 0, 0],
+      [-1, 0, 0],
+      [0, 1, 0],
+      [0, -1, 0],
+      [0, 0, 1],
+      [0, 0, -1]
+    ],
+    faces: [
+      [0,2,4],
+      [2,1,4],
+      [1,3,4],
+      [3,0,4],
+      [0,5,2],
+      [2,5,1],
+      [1,5,3],
+      [3,5,0]
+    ],
+    info: `
+<strong>Octahedron | O</strong><br>
+Platonic solid<br><br>
+<b>Vertices</b><br>6<br>
+<b>Edges</b><br>12<br>
+<b>Faces</b><br>8<br>
+<b>Vertex configuration</b><br>4.4.4<br>
+<b>Faces by type</b><br>8 triangles<br>
+<b>Volume</b><br>≈0.471s³<br>
+<b>Surface area</b><br>≈3.464s²<br>
+<b>Sphericity</b><br>≈0.846<br>
+<b>Symmetry</b><br>Full octahedral, Oh<br>
+<b>Order</b><br>48<br>
+<b>Properties</b><br>deltahedron<br>
+<b>Also known as</b><br>regular octahedron
+`
+  },
+  dodecahedron: {
+    name: "Dodecahedron",
+    symbol: "D",
+    vertices: (function(){
+      const PHI = (1 + Math.sqrt(5)) / 2;
+      const a = 1/PHI, b = 1;
+      return [
+        [ 0,  b,  a], [ 0,  b, -a], [ 0, -b,  a], [ 0, -b, -a],
+        [ a,  0,  b], [ a,  0, -b], [-a,  0,  b], [-a,  0, -b],
+        [ b,  a,  0], [ b, -a,  0], [-b,  a,  0], [-b, -a,  0],
+        [ 1,  1,  1], [ 1,  1, -1], [ 1, -1,  1], [ 1, -1, -1],
+        [-1,  1,  1], [-1,  1, -1], [-1, -1,  1], [-1, -1, -1]
+      ];
+    })(),
+    faces: [
+      [0,2,14,4,12], [0,12,8,16,6], [0,6,18,2,0], [2,18,9,15,14], [4,14,15,5,13],
+      [12,4,13,1,8], [8,1,17,16,8], [6,16,17,10,18], [18,10,11,9,18], [14,15,9,11,4],
+      [1,13,5,7,17], [17,7,11,10,17]
+    ],
+    info: `
+<strong>Dodecahedron | D</strong><br>
+Platonic solid<br><br>
+<b>Vertices</b><br>20<br>
+<b>Edges</b><br>30<br>
+<b>Faces</b><br>12<br>
+<b>Vertex configuration</b><br>3.3.3.3.3<br>
+<b>Faces by type</b><br>12 pentagons<br>
+<b>Volume</b><br>≈7.663s³<br>
+<b>Surface area</b><br>≈20.646s²<br>
+<b>Sphericity</b><br>≈0.910<br>
+<b>Symmetry</b><br>Full icosahedral, Ih<br>
+<b>Order</b><br>120<br>
+<b>Properties</b><br>zonohedron<br>
+<b>Also known as</b><br>regular dodecahedron
+`
+  },
+  icosahedron: {
+    name: "Icosahedron",
+    symbol: "I",
+    vertices: (function(){
+      const PHI = (1 + Math.sqrt(5)) / 2;
+      return [
+        [0, 1, PHI], [0, -1, PHI], [0, 1, -PHI], [0, -1, -PHI],
+        [1, PHI, 0], [-1, PHI, 0], [1, -PHI, 0], [-1, -PHI, 0],
+        [PHI, 0, 1], [-PHI, 0, 1], [PHI, 0, -1], [-PHI, 0, -1]
+      ];
+    })(),
+    faces: [
+      [0,1,8],[0,8,4],[0,4,5],[0,5,9],[0,9,1],
+      [1,9,7],[1,7,6],[1,6,8],[2,3,10],[2,10,4],
+      [2,4,5],[2,5,11],[2,11,3],[3,11,7],[3,7,6],
+      [3,6,10],[4,8,10],[5,9,11],[6,7,11],[8,6,10]
+    ],
+    info: `
+<strong>Icosahedron | I</strong><br>
+Platonic solid<br><br>
+<b>Vertices</b><br>12<br>
+<b>Edges</b><br>30<br>
+<b>Faces</b><br>20<br>
+<b>Vertex configuration</b><br>5.5.5<br>
+<b>Faces by type</b><br>20 triangles<br>
+<b>Volume</b><br>≈2.1817s³<br>
+<b>Surface area</b><br>≈8.660s²<br>
+<b>Sphericity</b><br>≈0.939<br>
+<b>Symmetry</b><br>Full icosahedral, Ih<br>
+<b>Order</b><br>120<br>
+<b>Properties</b><br>deltahedron<br>
+<b>Also known as</b><br>regular icosahedron
+`
+  }
+};
+
 let scene, camera, renderer, controls, directionalLight;
 let mainSolidType = 'octahedron';
-let mainSolidMaterial;
+let mainSolidGroup = null;
 let currentExplode = 0;
 let currentRotationSpeed = 0.01;
 let currentRotationDirection = 1;
@@ -9,8 +191,6 @@ let currentHue = 200, currentSaturation = 70, currentLightness = 70;
 let currentTransparency = 0;
 let currentWireframe = false;
 let miniScenes = [];
-let explodeGroup = null;
-let edgeGroup = null;
 let isDarkMode = false;
 
 function init() {
@@ -39,16 +219,6 @@ function init() {
   directionalLight.position.set(1, 1, 1);
   scene.add(directionalLight);
 
-  mainSolidMaterial = new THREE.MeshStandardMaterial({
-    roughness: 0.3,
-    metalness: 0.5,
-    flatShading: false,
-    transparent: true,
-    opacity: 1,
-    wireframe: currentWireframe
-  });
-  updateMaterial();
-
   initMiniScenes();
   updateMainSolid();
 
@@ -58,10 +228,10 @@ function init() {
     scene.background = isDarkMode ? new THREE.Color(0x111111) : new THREE.Color(0xf5f5f5);
   });
 
-  document.getElementById('hue').addEventListener('input', updateMaterial);
-  document.getElementById('saturation').addEventListener('input', updateMaterial);
-  document.getElementById('lightness').addEventListener('input', updateMaterial);
-  document.getElementById('transparency').addEventListener('input', updateMaterial);
+  document.getElementById('hue').addEventListener('input', updateMainSolid);
+  document.getElementById('saturation').addEventListener('input', updateMainSolid);
+  document.getElementById('lightness').addEventListener('input', updateMainSolid);
+  document.getElementById('transparency').addEventListener('input', updateMainSolid);
   document.getElementById('size').addEventListener('input', updateMainSolid);
   document.getElementById('rotationSpeed').addEventListener('input', updateSpeed);
   document.getElementById('rotationDirection').addEventListener('change', updateSpeed);
@@ -69,7 +239,7 @@ function init() {
   document.getElementById('lightX').addEventListener('input', updateLight);
   document.getElementById('lightY').addEventListener('input', updateLight);
   document.getElementById('lightZ').addEventListener('input', updateLight);
-  document.getElementById('wireframe').addEventListener('change', updateWireframe);
+  document.getElementById('wireframe').addEventListener('change', updateMainSolid);
 
   const controlsModal = document.getElementById('controlsModal');
   const hideControlsBtn = document.getElementById('hideControlsBtn');
@@ -130,7 +300,6 @@ function initMiniScenes() {
 
     miniScenes.push({ scene: miniScene, camera: miniCamera, mesh: miniMesh, renderer: miniRenderer });
 
-    // Click handler for mini solid
     wrapper.addEventListener('click', () => {
       mainSolidType = type.type;
       updateMainSolid();
@@ -147,108 +316,84 @@ function animateMiniScenes() {
 }
 animateMiniScenes();
 
-function updateMaterial() {
+function getCurrentSolidData() {
+  return SOLIDS[mainSolidType];
+}
+
+function updateMainSolid() {
+  // Remove previous group
+  if (mainSolidGroup) scene.remove(mainSolidGroup);
+
+  // Get controls
   currentHue = parseInt(document.getElementById('hue').value);
   currentSaturation = parseInt(document.getElementById('saturation').value);
   currentLightness = parseInt(document.getElementById('lightness').value);
   currentTransparency = parseInt(document.getElementById('transparency').value) / 100;
-  const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
-  mainSolidMaterial.color = color;
-  mainSolidMaterial.opacity = 1 - currentTransparency;
-  mainSolidMaterial.transparent = currentTransparency > 0;
-  if (explodeGroup) {
-    explodeGroup.children.forEach(child => {
-      if (child.material) child.material = mainSolidMaterial;
-    });
-  }
-}
-
-function updateWireframe() {
-  currentWireframe = document.getElementById('wireframe').checked;
-  mainSolidMaterial.wireframe = currentWireframe;
-  if (explodeGroup) {
-    explodeGroup.children.forEach(child => {
-      if (child.material) child.material.wireframe = currentWireframe;
-    });
-  }
-}
-
-function explodeGeometry(geometry, explodeFactor = 0) {
-  const group = new THREE.Group();
-  group.position.set(0, 1, 0);
-
-  geometry = geometry.clone();
-  geometry.scale(currentSize, currentSize, currentSize);
-
-  // Convert to non-indexed to get per-face vertices
-  const geo = geometry.toNonIndexed();
-  const pos = geo.attributes.position;
-  const faceCount = pos.count / 3;
-
-  for (let i = 0; i < faceCount; i++) {
-    const v1 = new THREE.Vector3().fromBufferAttribute(pos, i * 3 + 0);
-    const v2 = new THREE.Vector3().fromBufferAttribute(pos, i * 3 + 1);
-    const v3 = new THREE.Vector3().fromBufferAttribute(pos, i * 3 + 2);
-
-    const faceGeo = new THREE.BufferGeometry();
-    faceGeo.setAttribute('position', new THREE.Float32BufferAttribute([
-      v1.x, v1.y, v1.z,
-      v2.x, v2.y, v2.z,
-      v3.x, v3.y, v3.z
-    ], 3));
-    faceGeo.computeVertexNormals();
-
-    const faceNormal = new THREE.Vector3();
-    faceNormal.subVectors(v2, v1).cross(new THREE.Vector3().subVectors(v3, v1)).normalize();
-
-    const faceCenter = new THREE.Vector3();
-    faceCenter.add(v1).add(v2).add(v3).divideScalar(3);
-
-    const faceMesh = new THREE.Mesh(faceGeo, mainSolidMaterial.clone());
-    faceMesh.position.copy(faceCenter);
-    faceMesh.userData.normal = faceNormal;
-    faceMesh.userData.originalPosition = faceCenter.clone();
-    faceMesh.position.add(faceNormal.clone().multiplyScalar(explodeFactor * 0.5));
-
-    // Edges
-    const edgeGeo = new THREE.EdgesGeometry(faceGeo, 1);
-    const edgeMat = new THREE.LineBasicMaterial({ color: 0x111111, linewidth: 2 });
-    const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
-    edgeLines.renderOrder = 1;
-    faceMesh.add(edgeLines);
-
-    group.add(faceMesh);
-  }
-
-  return group;
-}
-
-function updateMainSolid() {
   currentSize = parseFloat(document.getElementById('size').value);
-  if (explodeGroup) scene.remove(explodeGroup);
+  currentWireframe = document.getElementById('wireframe').checked;
 
-  let geometry;
-  if (mainSolidType === 'tetrahedron') geometry = new THREE.TetrahedronGeometry(1, 0);
-  else if (mainSolidType === 'cube') geometry = new THREE.BoxGeometry(1.8, 1.8, 1.8);
-  else if (mainSolidType === 'octahedron') geometry = new THREE.OctahedronGeometry(1.2, 0);
-  else if (mainSolidType === 'dodecahedron') geometry = new THREE.DodecahedronGeometry(1, 0);
-  else if (mainSolidType === 'icosahedron') geometry = new THREE.IcosahedronGeometry(1, 0);
+  // Build group from solid data
+  const solid = getCurrentSolidData();
+  const vertices = solid.vertices.map(v => new THREE.Vector3(...v).normalize().multiplyScalar(currentSize * 1.3));
+  mainSolidGroup = new THREE.Group();
+  mainSolidGroup.position.set(0, 1, 0);
 
-  explodeGroup = explodeGeometry(geometry, currentExplode);
-  scene.add(explodeGroup);
+  // For each face, build geometry, mesh, and edge lines
+  solid.faces.forEach(faceVerts => {
+    // Triangulate if not triangle
+    for (let i = 1; i < faceVerts.length - 1; i++) {
+      const idx = [faceVerts[0], faceVerts[i], faceVerts[i+1]];
+      const geo = new THREE.BufferGeometry();
+      geo.setFromPoints([vertices[idx[0]], vertices[idx[1]], vertices[idx[2]]]);
+      geo.setIndex([0,1,2]);
+      geo.computeVertexNormals();
+
+      const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
+      const mat = new THREE.MeshStandardMaterial({
+        color,
+        roughness: 0.3,
+        metalness: 0.5,
+        flatShading: false,
+        transparent: true,
+        opacity: 1 - currentTransparency,
+        wireframe: currentWireframe
+      });
+
+      // Face mesh
+      const mesh = new THREE.Mesh(geo, mat);
+
+      // Face center and normal
+      const vA = vertices[idx[0]], vB = vertices[idx[1]], vC = vertices[idx[2]];
+      const center = new THREE.Vector3().add(vA).add(vB).add(vC).divideScalar(3);
+      const normal = new THREE.Vector3().subVectors(vB, vA).cross(new THREE.Vector3().subVectors(vC, vA)).normalize();
+
+      mesh.userData = {
+        center: center.clone(),
+        normal: normal.clone()
+      };
+
+      // Edges
+      const edgeGeo = new THREE.EdgesGeometry(geo, 1);
+      const edgeMat = new THREE.LineBasicMaterial({ color: 0x222222, linewidth: 2 });
+      const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
+      edgeLines.renderOrder = 1;
+      mesh.add(edgeLines);
+
+      mainSolidGroup.add(mesh);
+    }
+  });
+
+  scene.add(mainSolidGroup);
+  updateExplode();
+  updateSolidInfo();
 }
 
 function updateExplode() {
   currentExplode = parseFloat(document.getElementById('explode').value);
-  if (!explodeGroup) return;
-
-  explodeGroup.children.forEach(child => {
-    const normal = child.userData.normal;
-    const originalPos = child.userData.originalPosition;
-    if (normal && originalPos) {
-      child.position.copy(originalPos);
-      child.position.add(normal.clone().multiplyScalar(currentExplode * 0.5));
-    }
+  if (!mainSolidGroup) return;
+  mainSolidGroup.children.forEach(face => {
+    const { center, normal } = face.userData;
+    face.position.copy(center).add(normal.clone().multiplyScalar(currentExplode));
   });
 }
 
@@ -264,6 +409,10 @@ function updateLight() {
   directionalLight.position.set(x, y, z);
 }
 
+function updateSolidInfo() {
+  document.getElementById('solidInfo').innerHTML = SOLIDS[mainSolidType].info;
+}
+
 function onWindowResize() {
   const width = window.innerWidth;
   const height = window.innerHeight - 120;
@@ -275,8 +424,8 @@ function onWindowResize() {
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
-  if (explodeGroup) {
-    explodeGroup.rotation.y += currentRotationSpeed * currentRotationDirection;
+  if (mainSolidGroup) {
+    mainSolidGroup.rotation.y += currentRotationSpeed * currentRotationDirection;
   }
   renderer.render(scene, camera);
 }
