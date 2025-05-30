@@ -1,4 +1,3 @@
-// --- Complete Platonic solids data ---
 const SOLIDS = {
   tetrahedron: {
     name: "Tetrahedron",
@@ -111,22 +110,6 @@ Platonic solid<br><br>
   dodecahedron: {
     name: "Dodecahedron",
     symbol: "D",
-    vertices: (function(){
-      const PHI = (1 + Math.sqrt(5)) / 2;
-      const a = 1/PHI, b = 1;
-      return [
-        [ 0,  b,  a], [ 0,  b, -a], [ 0, -b,  a], [ 0, -b, -a],
-        [ a,  0,  b], [ a,  0, -b], [-a,  0,  b], [-a,  0, -b],
-        [ b,  a,  0], [ b, -a,  0], [-b,  a,  0], [-b, -a,  0],
-        [ 1,  1,  1], [ 1,  1, -1], [ 1, -1,  1], [ 1, -1, -1],
-        [-1,  1,  1], [-1,  1, -1], [-1, -1,  1], [-1, -1, -1]
-      ];
-    })(),
-    faces: [
-      [0,2,14,4,12], [0,12,8,16,6], [0,6,18,2,0], [2,18,9,15,14], [4,14,15,5,13],
-      [12,4,13,1,8], [8,1,17,16,8], [6,16,17,10,18], [18,10,11,9,18], [14,15,9,11,4],
-      [1,13,5,7,17], [17,7,11,10,17]
-    ],
     info: `
 <strong>Dodecahedron | D</strong><br>
 Platonic solid<br><br>
@@ -147,20 +130,6 @@ Platonic solid<br><br>
   icosahedron: {
     name: "Icosahedron",
     symbol: "I",
-    vertices: (function(){
-      const PHI = (1 + Math.sqrt(5)) / 2;
-      return [
-        [0, 1, PHI], [0, -1, PHI], [0, 1, -PHI], [0, -1, -PHI],
-        [1, PHI, 0], [-1, PHI, 0], [1, -PHI, 0], [-1, -PHI, 0],
-        [PHI, 0, 1], [-PHI, 0, 1], [PHI, 0, -1], [-PHI, 0, -1]
-      ];
-    })(),
-    faces: [
-      [0,1,8],[0,8,4],[0,4,5],[0,5,9],[0,9,1],
-      [1,9,7],[1,7,6],[1,6,8],[2,3,10],[2,10,4],
-      [2,4,5],[2,5,11],[2,11,3],[3,11,7],[3,7,6],
-      [3,6,10],[4,8,10],[5,9,11],[6,7,11],[8,6,10]
-    ],
     info: `
 <strong>Icosahedron | I</strong><br>
 Platonic solid<br><br>
@@ -241,16 +210,40 @@ function init() {
   document.getElementById('explode').addEventListener('input', updateExplode);
   document.getElementById('wireframe').addEventListener('change', updateMainSolid);
 
+  // Controls modal
   const controlsModal = document.getElementById('controlsModal');
   const hideControlsBtn = document.getElementById('hideControlsBtn');
   const showControlsBtn = document.getElementById('showControlsBtn');
-
   showControlsBtn.addEventListener('click', () => {
     controlsModal.classList.add('active');
   });
   hideControlsBtn.addEventListener('click', () => {
     controlsModal.classList.remove('active');
   });
+
+  // Info modal
+  const infoModal = document.getElementById('infoModal');
+  const showInfoBtn = document.getElementById('showInfoBtn');
+  const hideInfoBtn = document.getElementById('hideInfoBtn');
+  showInfoBtn.addEventListener('click', () => {
+    infoModal.classList.add('active');
+  });
+  hideInfoBtn.addEventListener('click', () => {
+    infoModal.classList.remove('active');
+  });
+
+  // Responsive Three.js canvas
+  function resizeThreeCanvas() {
+    const width = window.innerWidth;
+    const height = window.innerHeight - 120; // fill all above footer
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height, false);
+    renderer.domElement.style.width = width + "px";
+    renderer.domElement.style.height = height + "px";
+  }
+  window.addEventListener('resize', resizeThreeCanvas);
+  resizeThreeCanvas();
 
   window.addEventListener('resize', onWindowResize);
   animate();
@@ -326,18 +319,78 @@ function updateMainSolid() {
   currentSize = parseFloat(document.getElementById('size').value);
   currentWireframe = document.getElementById('wireframe').checked;
 
+  // For Dodecahedron and Icosahedron, use built-in geometry and split faces at runtime
+  if (mainSolidType === 'dodecahedron' || mainSolidType === 'icosahedron') {
+    let geometry;
+    if (mainSolidType === 'dodecahedron') {
+      geometry = new THREE.DodecahedronGeometry(currentSize * 1.3, 0);
+    } else {
+      geometry = new THREE.IcosahedronGeometry(currentSize * 1.3, 0);
+    }
+    geometry = geometry.toNonIndexed();
+    const pos = geometry.attributes.position;
+    mainSolidGroup = new THREE.Group();
+    mainSolidGroup.position.set(0, 1, 0);
+
+    for (let i = 0; i < pos.count; i += 3) {
+      const vA = new THREE.Vector3().fromBufferAttribute(pos, i);
+      const vB = new THREE.Vector3().fromBufferAttribute(pos, i + 1);
+      const vC = new THREE.Vector3().fromBufferAttribute(pos, i + 2);
+
+      const faceCenter = new THREE.Vector3().add(vA).add(vB).add(vC).divideScalar(3);
+      const facePoints = [vA.clone().sub(faceCenter), vB.clone().sub(faceCenter), vC.clone().sub(faceCenter)];
+      const geo = new THREE.BufferGeometry().setFromPoints(facePoints);
+      geo.setIndex([0, 1, 2]);
+      geo.computeVertexNormals();
+
+      const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
+      const mat = new THREE.MeshStandardMaterial({
+        color,
+        roughness: 0.3,
+        metalness: 0.5,
+        flatShading: false,
+        transparent: true,
+        opacity: 1 - currentTransparency,
+        wireframe: currentWireframe
+      });
+
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.copy(faceCenter);
+
+      const normal = new THREE.Vector3().subVectors(facePoints[1], facePoints[0])
+        .cross(new THREE.Vector3().subVectors(facePoints[2], facePoints[0]))
+        .normalize();
+
+      mesh.userData = {
+        center: faceCenter.clone(),
+        normal: normal.clone()
+      };
+
+      const edgeGeo = new THREE.EdgesGeometry(geo, 1);
+      const edgeMat = new THREE.LineBasicMaterial({ color: isDarkMode ? 0xffffff : 0x222222, linewidth: 2 });
+      const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
+      edgeLines.renderOrder = 1;
+      mesh.add(edgeLines);
+
+      mainSolidGroup.add(mesh);
+    }
+    scene.add(mainSolidGroup);
+    updateExplode();
+    updateSolidInfo();
+    return;
+  }
+
+  // For all other solids, use manual face construction
   const solid = SOLIDS[mainSolidType];
   const vertices = solid.vertices.map(v => new THREE.Vector3(...v).normalize().multiplyScalar(currentSize * 1.3));
   mainSolidGroup = new THREE.Group();
   mainSolidGroup.position.set(0, 1, 0);
 
   solid.faces.forEach(faceVerts => {
-    // Compute face center
     let faceCenter = new THREE.Vector3();
     faceVerts.forEach(idx => faceCenter.add(vertices[idx]));
     faceCenter.divideScalar(faceVerts.length);
 
-    // Build face geometry relative to center
     let facePoints = faceVerts.map(idx => vertices[idx].clone().sub(faceCenter));
     let geo = new THREE.BufferGeometry().setFromPoints(facePoints);
     let indices = [];
@@ -361,7 +414,6 @@ function updateMainSolid() {
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.copy(faceCenter);
 
-    // Face normal
     let normal = new THREE.Vector3();
     if (facePoints.length >= 3) {
       normal.subVectors(facePoints[1], facePoints[0])
@@ -402,9 +454,9 @@ function updateSpeed() {
 }
 
 function updateLight() {
-  const x = parseFloat(document.getElementById('lightX').value);
-  const y = parseFloat(document.getElementById('lightY').value);
-  const z = parseFloat(document.getElementById('lightZ').value);
+  const x = parseFloat(document.getElementById('lightX')?.value || 1);
+  const y = parseFloat(document.getElementById('lightY')?.value || 1);
+  const z = parseFloat(document.getElementById('lightZ')?.value || 1);
   directionalLight.position.set(x, y, z);
 }
 
@@ -417,7 +469,9 @@ function onWindowResize() {
   const height = window.innerHeight - 120;
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
-  renderer.setSize(width, height);
+  renderer.setSize(width, height, false);
+  renderer.domElement.style.width = width + "px";
+  renderer.domElement.style.height = height + "px";
 }
 
 function animate() {
