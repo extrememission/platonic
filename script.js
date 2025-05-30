@@ -1,21 +1,14 @@
-let scene, camera, renderer, controls, mainSolid, directionalLight;
+let scene, camera, renderer, controls, mainSolid, directionalLight, transformControls;
 let isDarkMode = false;
 let mainSolidType = 'octahedron';
 let mainSolidMaterial;
-let currentExplode = 0;
-let currentRotationSpeed = 0.01;
-let currentRotationDirection = 1;
-let currentSize = 1;
 let currentHue = 200, currentSaturation = 70, currentLightness = 70;
+let miniScenes = [];
 
-// Mini preview scenes
-const miniScenes = [];
-
-// Initialize the main scene
 function init() {
   const container = document.getElementById('renderCanvas');
   const width = window.innerWidth;
-  const height = window.innerHeight - 120; // Account for footer
+  const height = window.innerHeight - 120;
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(width, height);
@@ -62,13 +55,24 @@ function init() {
   document.getElementById('hue').addEventListener('input', updateMaterial);
   document.getElementById('saturation').addEventListener('input', updateMaterial);
   document.getElementById('lightness').addEventListener('input', updateMaterial);
-  document.getElementById('size').addEventListener('input', updateMainSolid);
-  document.getElementById('rotationSpeed').addEventListener('input', updateSpeed);
-  document.getElementById('rotationDirection').addEventListener('change', updateSpeed);
-  document.getElementById('explode').addEventListener('input', updateExplode);
   document.getElementById('lightX').addEventListener('input', updateLight);
   document.getElementById('lightY').addEventListener('input', updateLight);
   document.getElementById('lightZ').addEventListener('input', updateLight);
+
+  // Gizmo Controls
+  document.getElementById('moveBtn').addEventListener('click', () => {
+    transformControls.setMode('translate');
+  });
+  document.getElementById('rotateBtn').addEventListener('click', () => {
+    transformControls.setMode('rotate');
+  });
+  document.getElementById('scaleBtn').addEventListener('click', () => {
+    transformControls.setMode('scale');
+  });
+
+  // Add TransformControls (gizmo)
+  transformControls = new THREE.TransformControls(camera, renderer.domElement);
+  scene.add(transformControls);
 
   window.addEventListener('resize', onWindowResize);
   animate();
@@ -143,7 +147,6 @@ function updateMaterial() {
 }
 
 function updateMainSolid() {
-  currentSize = parseFloat(document.getElementById('size').value);
   if (mainSolid) scene.remove(mainSolid);
 
   let geometry;
@@ -154,21 +157,9 @@ function updateMainSolid() {
   else if (mainSolidType === 'icosahedron') geometry = new THREE.IcosahedronGeometry(1, 0);
 
   mainSolid = new THREE.Mesh(geometry, mainSolidMaterial);
-  mainSolid.scale.set(currentSize, currentSize, currentSize);
   mainSolid.position.set(0, 1, 0);
   scene.add(mainSolid);
-  updateExplode();
-}
-
-function updateExplode() {
-  currentExplode = parseFloat(document.getElementById('explode').value);
-  if (!mainSolid) return;
-  mainSolid.scale.set(currentSize * (1 + currentExplode), currentSize * (1 + currentExplode), currentSize * (1 + currentExplode));
-}
-
-function updateSpeed() {
-  currentRotationSpeed = parseFloat(document.getElementById('rotationSpeed').value);
-  currentRotationDirection = parseInt(document.getElementById('rotationDirection').value);
+  transformControls.attach(mainSolid);
 }
 
 function updateLight() {
@@ -189,9 +180,6 @@ function onWindowResize() {
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
-  if (mainSolid) {
-    mainSolid.rotation.y += currentRotationSpeed * currentRotationDirection;
-  }
   renderer.render(scene, camera);
 }
 
