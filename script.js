@@ -1,3 +1,5 @@
+// Complete script.js with corrected Dodecahedron face construction
+
 const SOLIDS = {
   tetrahedron: {
     name: "Tetrahedron",
@@ -110,6 +112,32 @@ Platonic solid<br><br>
   dodecahedron: {
     name: "Dodecahedron",
     symbol: "D",
+    // Vertices and faces for pentagonal faces (canonical)
+    vertices: (function(){
+      const PHI = (1 + Math.sqrt(5)) / 2;
+      const a = 1 / PHI, b = 1;
+      return [
+        [ 0,  b,  a], [ 0,  b, -a], [ 0, -b,  a], [ 0, -b, -a],
+        [ a,  0,  b], [ a,  0, -b], [-a,  0,  b], [-a,  0, -b],
+        [ b,  a,  0], [ b, -a,  0], [-b,  a,  0], [-b, -a,  0],
+        [ 1,  1,  1], [ 1,  1, -1], [ 1, -1,  1], [ 1, -1, -1],
+        [-1,  1,  1], [-1,  1, -1], [-1, -1,  1], [-1, -1, -1]
+      ];
+    })(),
+    faces: [
+      [16,0,2,18,6],
+      [16,10,8,12,0],
+      [0,12,4,14,2],
+      [2,14,9,11,18],
+      [18,11,19,7,6],
+      [6,7,17,10,16],
+      [1,17,10,8,13],
+      [13,8,12,4,5],
+      [5,4,14,9,15],
+      [15,9,11,19,3],
+      [3,19,7,17,1],
+      [1,13,5,15,3]
+    ],
     info: `
 <strong>Dodecahedron | D</strong><br>
 Platonic solid<br><br>
@@ -130,6 +158,7 @@ Platonic solid<br><br>
   icosahedron: {
     name: "Icosahedron",
     symbol: "I",
+    // Use built-in geometry for icosahedron, so no vertices/faces here
     info: `
 <strong>Icosahedron | I</strong><br>
 Platonic solid<br><br>
@@ -210,7 +239,6 @@ function init() {
   document.getElementById('explode').addEventListener('input', updateExplode);
   document.getElementById('wireframe').addEventListener('change', updateMainSolid);
 
-  // Controls modal
   const controlsModal = document.getElementById('controlsModal');
   const hideControlsBtn = document.getElementById('hideControlsBtn');
   const showControlsBtn = document.getElementById('showControlsBtn');
@@ -221,7 +249,6 @@ function init() {
     controlsModal.classList.remove('active');
   });
 
-  // Info modal
   const infoModal = document.getElementById('infoModal');
   const showInfoBtn = document.getElementById('showInfoBtn');
   const hideInfoBtn = document.getElementById('hideInfoBtn');
@@ -232,20 +259,8 @@ function init() {
     infoModal.classList.remove('active');
   });
 
-  // Responsive Three.js canvas
-  function resizeThreeCanvas() {
-    const width = window.innerWidth;
-    const height = window.innerHeight - 120; // fill all above footer
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.setSize(width, height, false);
-    renderer.domElement.style.width = width + "px";
-    renderer.domElement.style.height = height + "px";
-  }
-  window.addEventListener('resize', resizeThreeCanvas);
-  resizeThreeCanvas();
-
   window.addEventListener('resize', onWindowResize);
+  resizeThreeCanvas();
   animate();
 }
 
@@ -319,14 +334,76 @@ function updateMainSolid() {
   currentSize = parseFloat(document.getElementById('size').value);
   currentWireframe = document.getElementById('wireframe').checked;
 
-  // For Dodecahedron and Icosahedron, use built-in geometry and split faces at runtime
-  if (mainSolidType === 'dodecahedron' || mainSolidType === 'icosahedron') {
-    let geometry;
-    if (mainSolidType === 'dodecahedron') {
-      geometry = new THREE.DodecahedronGeometry(currentSize * 1.3, 0);
-    } else {
-      geometry = new THREE.IcosahedronGeometry(currentSize * 1.3, 0);
-    }
+  if (mainSolidType === 'dodecahedron') {
+    // Build pentagonal faces manually
+    const vertices = SOLIDS.dodecahedron.vertices.map(v => new THREE.Vector3(...v).normalize().multiplyScalar(currentSize * 1.3));
+    const faces = SOLIDS.dodecahedron.faces;
+    mainSolidGroup = new THREE.Group();
+    mainSolidGroup.position.set(0, 1, 0);
+
+    faces.forEach(faceVerts => {
+      // Compute face center
+      let faceCenter = new THREE.Vector3();
+      faceVerts.forEach(idx => faceCenter.add(vertices[idx]));
+      faceCenter.divideScalar(faceVerts.length);
+
+      // Build face geometry relative to center
+      let facePoints = faceVerts.map(idx => vertices[idx].clone().sub(faceCenter));
+      let geo = new THREE.BufferGeometry().setFromPoints(facePoints);
+
+      // Triangulate pentagon: fan triangulation
+      let indices = [];
+      for (let i = 1; i < facePoints.length - 1; i++) {
+        indices.push(0, i, i + 1);
+      }
+      geo.setIndex(indices);
+      geo.computeVertexNormals();
+
+      const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
+      const mat = new THREE.MeshStandardMaterial({
+        color,
+        roughness: 0.3,
+        metalness: 0.5,
+        flatShading: false,
+        transparent: true,
+        opacity: 1 - currentTransparency,
+        wireframe: currentWireframe
+      });
+
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.copy(faceCenter);
+
+      // Face normal
+      let normal = new THREE.Vector3();
+      if (facePoints.length >= 3) {
+        normal.subVectors(facePoints[1], facePoints[0])
+          .cross(new THREE.Vector3().subVectors(facePoints[2], facePoints[0]))
+          .normalize();
+      }
+      mesh.userData = {
+        center: faceCenter.clone(),
+        normal: normal.clone()
+      };
+
+      // Edges
+      const edgeGeo = new THREE.EdgesGeometry(geo, 1);
+      const edgeMat = new THREE.LineBasicMaterial({ color: isDarkMode ? 0xffffff : 0x222222, linewidth: 2 });
+      const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
+      edgeLines.renderOrder = 1;
+      mesh.add(edgeLines);
+
+      mainSolidGroup.add(mesh);
+    });
+
+    scene.add(mainSolidGroup);
+    updateExplode();
+    updateSolidInfo();
+    return;
+  }
+
+  if (mainSolidType === 'icosahedron') {
+    // Use built-in geometry, split into triangles for explode
+    let geometry = new THREE.IcosahedronGeometry(currentSize * 1.3, 0);
     geometry = geometry.toNonIndexed();
     const pos = geometry.attributes.position;
     mainSolidGroup = new THREE.Group();
@@ -380,7 +457,7 @@ function updateMainSolid() {
     return;
   }
 
-  // For all other solids, use manual face construction
+  // For other solids, use manual face construction
   const solid = SOLIDS[mainSolidType];
   const vertices = solid.vertices.map(v => new THREE.Vector3(...v).normalize().multiplyScalar(currentSize * 1.3));
   mainSolidGroup = new THREE.Group();
@@ -465,6 +542,16 @@ function updateSolidInfo() {
 }
 
 function onWindowResize() {
+  const width = window.innerWidth;
+  const height = window.innerHeight - 120;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height, false);
+  renderer.domElement.style.width = width + "px";
+  renderer.domElement.style.height = height + "px";
+}
+
+function resizeThreeCanvas() {
   const width = window.innerWidth;
   const height = window.innerHeight - 120;
   camera.aspect = width / height;
