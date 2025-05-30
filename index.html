@@ -10,10 +10,11 @@
 </head>
 <body>
   <div id="renderCanvas"></div>
-  <div id="solidInfo"></div>
   <div id="darkModeToggle">
     <i class="material-icons">brightness_4</i>
   </div>
+  <button id="showControlsBtn" class="material-icons">tune</button>
+  <button id="showInfoBtn" class="material-icons">info</button>
   <div id="controlsModal">
     <div id="controls">
       <div class="control-row">
@@ -61,7 +62,10 @@
     </div>
     <button id="hideControlsBtn" class="material-icons">close</button>
   </div>
-  <button id="showControlsBtn" class="material-icons">tune</button>
+  <div id="infoModal">
+    <div id="solidInfo"></div>
+    <button id="hideInfoBtn" class="material-icons">close</button>
+  </div>
   <footer id="solidSelector">
     <div class="solid-wrapper" data-type="tetrahedron">
       <canvas class="solid-preview" width="60" height="60"></canvas>
