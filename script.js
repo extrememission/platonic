@@ -10,6 +10,7 @@ let currentHue = 200, currentSaturation = 70, currentLightness = 70;
 let currentTransparency = 0;
 let currentWireframe = false;
 let miniScenes = [];
+let explodeGroup = null; // Group containing exploded faces
 
 function init() {
   const container = document.getElementById('renderCanvas');
@@ -158,66 +159,46 @@ function updateMaterial() {
   mainSolidMaterial.color = color;
   mainSolidMaterial.opacity = 1 - currentTransparency;
   mainSolidMaterial.transparent = currentTransparency > 0;
-  if (mainSolid) mainSolid.material = mainSolidMaterial;
+  if (explodeGroup) {
+    explodeGroup.children.forEach(child => {
+      if (child.material) child.material = mainSolidMaterial;
+    });
+  }
 }
 
 function updateWireframe() {
   currentWireframe = document.getElementById('wireframe').checked;
   mainSolidMaterial.wireframe = currentWireframe;
-  if (mainSolid) mainSolid.material = mainSolidMaterial;
-}
-
-function updateMainSolid() {
-  currentSize = parseFloat(document.getElementById('size').value);
-  if (mainSolid) scene.remove(mainSolid);
-
-  let geometry;
-  if (mainSolidType === 'tetrahedron') geometry = new THREE.TetrahedronGeometry(1, 0);
-  else if (mainSolidType === 'cube') geometry = new THREE.BoxGeometry(1.8, 1.8, 1.8);
-  else if (mainSolidType === 'octahedron') geometry = new THREE.OctahedronGeometry(1.2, 0);
-  else if (mainSolidType === 'dodecahedron') geometry = new THREE.DodecahedronGeometry(1, 0);
-  else if (mainSolidType === 'icosahedron') geometry = new THREE.IcosahedronGeometry(1, 0);
-
-  mainSolid = new THREE.Mesh(geometry, mainSolidMaterial);
-  mainSolid.position.set(0, 1, 0);
-  mainSolid.scale.set(currentSize, currentSize, currentSize);
-  scene.add(mainSolid);
-  updateExplode();
-}
-
-function updateExplode() {
-  currentExplode = parseFloat(document.getElementById('explode').value);
-  if (!mainSolid) return;
-  mainSolid.scale.set(currentSize * (1 + currentExplode), currentSize * (1 + currentExplode), currentSize * (1 + currentExplode));
-}
-
-function updateSpeed() {
-  currentRotationSpeed = parseFloat(document.getElementById('rotationSpeed').value);
-  currentRotationDirection = parseInt(document.getElementById('rotationDirection').value);
-}
-
-function updateLight() {
-  const x = parseFloat(document.getElementById('lightX').value);
-  const y = parseFloat(document.getElementById('lightY').value);
-  const z = parseFloat(document.getElementById('lightZ').value);
-  directionalLight.position.set(x, y, z);
-}
-
-function onWindowResize() {
-  const width = window.innerWidth;
-  const height = window.innerHeight - 120;
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
-  renderer.setSize(width, height);
-}
-
-function animate() {
-  requestAnimationFrame(animate);
-  controls.update();
-  if (mainSolid) {
-    mainSolid.rotation.y += currentRotationSpeed * currentRotationDirection;
+  if (explodeGroup) {
+    explodeGroup.children.forEach(child => {
+      if (child.material) child.material.wireframe = currentWireframe;
+    });
   }
-  renderer.render(scene, camera);
 }
 
-init();
+// Helper: Split geometry into faces and return a group
+function explodeGeometry(geometry, explodeFactor = 0) {
+  const group = new THREE.Group();
+  group.position.set(0, 1, 0);
+
+  // Clone so we can scale the geometry
+  const geo = geometry.clone();
+  geo.scale(currentSize, currentSize, currentSize);
+
+  // Convert to non-indexed to get per-face vertices
+  const indexedGeo = new THREE.BufferGeometry().fromGeometry(new THREE.Geometry().fromBufferGeometry(geo));
+  const position = indexedGeo.attributes.position;
+  const index = indexedGeo.index;
+
+  // For each face, create a triangle and move it along its normal
+  for (let i = 0; i < index.count; i += 3) {
+    const a = index.getX(i);
+    const b = index.getX(i + 1);
+    const c = index.getX(i + 2);
+
+    const v1 = new THREE.Vector3().fromBufferAttribute(position, a);
+    const v2 = new THREE.Vector3().fromBufferAttribute(position, b);
+    const v3 = new THREE.Vector3().fromBufferAttribute(position, c);
+
+    const faceGeo = new THREE.BufferGeometry();
+    faceGeo.setAttribute('position', new THREE
