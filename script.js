@@ -1,4 +1,4 @@
-// --- Polyhedra data ---
+// --- Complete Platonic solids data ---
 const SOLIDS = {
   tetrahedron: {
     name: "Tetrahedron",
@@ -239,9 +239,6 @@ function init() {
   document.getElementById('rotationSpeed').addEventListener('input', updateSpeed);
   document.getElementById('rotationDirection').addEventListener('change', updateSpeed);
   document.getElementById('explode').addEventListener('input', updateExplode);
-  document.getElementById('lightX').addEventListener('input', updateLight);
-  document.getElementById('lightY').addEventListener('input', updateLight);
-  document.getElementById('lightZ').addEventListener('input', updateLight);
   document.getElementById('wireframe').addEventListener('change', updateMainSolid);
 
   const controlsModal = document.getElementById('controlsModal');
@@ -319,10 +316,6 @@ function animateMiniScenes() {
 }
 animateMiniScenes();
 
-function getCurrentSolidData() {
-  return SOLIDS[mainSolidType];
-}
-
 function updateMainSolid() {
   if (mainSolidGroup) scene.remove(mainSolidGroup);
 
@@ -333,49 +326,60 @@ function updateMainSolid() {
   currentSize = parseFloat(document.getElementById('size').value);
   currentWireframe = document.getElementById('wireframe').checked;
 
-  const solid = getCurrentSolidData();
+  const solid = SOLIDS[mainSolidType];
   const vertices = solid.vertices.map(v => new THREE.Vector3(...v).normalize().multiplyScalar(currentSize * 1.3));
   mainSolidGroup = new THREE.Group();
   mainSolidGroup.position.set(0, 1, 0);
 
   solid.faces.forEach(faceVerts => {
-    for (let i = 1; i < faceVerts.length - 1; i++) {
-      const idx = [faceVerts[0], faceVerts[i], faceVerts[i+1]];
-      const geo = new THREE.BufferGeometry();
-      geo.setFromPoints([vertices[idx[0]], vertices[idx[1]], vertices[idx[2]]]);
-      geo.setIndex([0,1,2]);
-      geo.computeVertexNormals();
+    // Compute face center
+    let faceCenter = new THREE.Vector3();
+    faceVerts.forEach(idx => faceCenter.add(vertices[idx]));
+    faceCenter.divideScalar(faceVerts.length);
 
-      const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
-      const mat = new THREE.MeshStandardMaterial({
-        color,
-        roughness: 0.3,
-        metalness: 0.5,
-        flatShading: false,
-        transparent: true,
-        opacity: 1 - currentTransparency,
-        wireframe: currentWireframe
-      });
-
-      const mesh = new THREE.Mesh(geo, mat);
-
-      const vA = vertices[idx[0]], vB = vertices[idx[1]], vC = vertices[idx[2]];
-      const center = new THREE.Vector3().add(vA).add(vB).add(vC).divideScalar(3);
-      const normal = new THREE.Vector3().subVectors(vB, vA).cross(new THREE.Vector3().subVectors(vC, vA)).normalize();
-
-      mesh.userData = {
-        center: center.clone(),
-        normal: normal.clone()
-      };
-
-      const edgeGeo = new THREE.EdgesGeometry(geo, 1);
-      const edgeMat = new THREE.LineBasicMaterial({ color: isDarkMode ? 0xffffff : 0x222222, linewidth: 2 });
-      const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
-      edgeLines.renderOrder = 1;
-      mesh.add(edgeLines);
-
-      mainSolidGroup.add(mesh);
+    // Build face geometry relative to center
+    let facePoints = faceVerts.map(idx => vertices[idx].clone().sub(faceCenter));
+    let geo = new THREE.BufferGeometry().setFromPoints(facePoints);
+    let indices = [];
+    for (let i = 1; i < facePoints.length - 1; i++) {
+      indices.push(0, i, i + 1);
     }
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+
+    const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
+    const mat = new THREE.MeshStandardMaterial({
+      color,
+      roughness: 0.3,
+      metalness: 0.5,
+      flatShading: false,
+      transparent: true,
+      opacity: 1 - currentTransparency,
+      wireframe: currentWireframe
+    });
+
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.copy(faceCenter);
+
+    // Face normal
+    let normal = new THREE.Vector3();
+    if (facePoints.length >= 3) {
+      normal.subVectors(facePoints[1], facePoints[0])
+        .cross(new THREE.Vector3().subVectors(facePoints[2], facePoints[0]))
+        .normalize();
+    }
+    mesh.userData = {
+      center: faceCenter.clone(),
+      normal: normal.clone()
+    };
+
+    const edgeGeo = new THREE.EdgesGeometry(geo, 1);
+    const edgeMat = new THREE.LineBasicMaterial({ color: isDarkMode ? 0xffffff : 0x222222, linewidth: 2 });
+    const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
+    edgeLines.renderOrder = 1;
+    mesh.add(edgeLines);
+
+    mainSolidGroup.add(mesh);
   });
 
   scene.add(mainSolidGroup);
