@@ -10,6 +10,7 @@ let currentTransparency = 0;
 let currentWireframe = false;
 let miniScenes = [];
 let explodeGroup = null;
+let edgeGroup = null;
 let isDarkMode = false;
 
 function init() {
@@ -208,6 +209,13 @@ function explodeGeometry(geometry, explodeFactor = 0) {
     faceMesh.userData.normal = faceNormal;
     faceMesh.userData.originalPosition = faceCenter.clone();
     faceMesh.position.add(faceNormal.clone().multiplyScalar(explodeFactor * 0.5));
+
+    // Edges
+    const edgeGeo = new THREE.EdgesGeometry(faceGeo, 1);
+    const edgeMat = new THREE.LineBasicMaterial({ color: 0x111111, linewidth: 2 });
+    const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
+    edgeLines.renderOrder = 1;
+    faceMesh.add(edgeLines);
 
     group.add(faceMesh);
   }
