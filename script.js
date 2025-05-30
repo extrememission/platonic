@@ -1,184 +1,6 @@
-// Polyhedra data inspired by tesseralis/polyhedra-viewer (https://github.com/tesseralis/polyhedra-viewer)
-const SOLIDS = {
-  tetrahedron: {
-    name: "Tetrahedron",
-    symbol: "T",
-    vertices: [
-      [1, 1, 1],
-      [-1, -1, 1],
-      [-1, 1, -1],
-      [1, -1, -1]
-    ],
-    faces: [
-      [0, 1, 2],
-      [0, 3, 1],
-      [0, 2, 3],
-      [1, 3, 2]
-    ],
-    info: `
-<strong>Tetrahedron | T</strong><br>
-Platonic solid<br><br>
-<b>Vertices</b><br>4<br>
-<b>Edges</b><br>6<br>
-<b>Faces</b><br>4<br>
-<b>Vertex configuration</b><br>3.3.3<br>
-<b>Faces by type</b><br>4 triangles<br>
-<b>Volume</b><br>≈0.118s³<br>
-<b>Surface area</b><br>≈1.732s²<br>
-<b>Sphericity</b><br>≈0.671<br>
-<b>Symmetry</b><br>Full tetrahedral, Td<br>
-<b>Order</b><br>24<br>
-<b>Properties</b><br>deltahedron<br>
-<b>Also known as</b><br>triangular pyramid, digonal antiprism, disphenoid
-`
-  },
-  cube: {
-    name: "Cube",
-    symbol: "C",
-    vertices: [
-      [-1, -1, -1],
-      [-1, -1, 1],
-      [-1, 1, -1],
-      [-1, 1, 1],
-      [1, -1, -1],
-      [1, -1, 1],
-      [1, 1, -1],
-      [1, 1, 1]
-    ],
-    faces: [
-      [0,1,3,2],
-      [4,6,7,5],
-      [0,4,5,1],
-      [2,3,7,6],
-      [0,2,6,4],
-      [1,5,7,3]
-    ],
-    info: `
-<strong>Cube | C</strong><br>
-Platonic solid<br><br>
-<b>Vertices</b><br>8<br>
-<b>Edges</b><br>12<br>
-<b>Faces</b><br>6<br>
-<b>Vertex configuration</b><br>4.4.4<br>
-<b>Faces by type</b><br>6 squares<br>
-<b>Volume</b><br>s³<br>
-<b>Surface area</b><br>6s²<br>
-<b>Sphericity</b><br>≈0.806<br>
-<b>Symmetry</b><br>Full octahedral, Oh<br>
-<b>Order</b><br>48<br>
-<b>Properties</b><br>zonohedron, regular hexahedron<br>
-<b>Also known as</b><br>regular hexahedron
-`
-  },
-  octahedron: {
-    name: "Octahedron",
-    symbol: "O",
-    vertices: [
-      [1, 0, 0],
-      [-1, 0, 0],
-      [0, 1, 0],
-      [0, -1, 0],
-      [0, 0, 1],
-      [0, 0, -1]
-    ],
-    faces: [
-      [0,2,4],
-      [2,1,4],
-      [1,3,4],
-      [3,0,4],
-      [0,5,2],
-      [2,5,1],
-      [1,5,3],
-      [3,5,0]
-    ],
-    info: `
-<strong>Octahedron | O</strong><br>
-Platonic solid<br><br>
-<b>Vertices</b><br>6<br>
-<b>Edges</b><br>12<br>
-<b>Faces</b><br>8<br>
-<b>Vertex configuration</b><br>4.4.4<br>
-<b>Faces by type</b><br>8 triangles<br>
-<b>Volume</b><br>≈0.471s³<br>
-<b>Surface area</b><br>≈3.464s²<br>
-<b>Sphericity</b><br>≈0.846<br>
-<b>Symmetry</b><br>Full octahedral, Oh<br>
-<b>Order</b><br>48<br>
-<b>Properties</b><br>deltahedron<br>
-<b>Also known as</b><br>regular octahedron
-`
-  },
-  dodecahedron: {
-    name: "Dodecahedron",
-    symbol: "D",
-    vertices: (function(){
-      const PHI = (1 + Math.sqrt(5)) / 2;
-      const a = 1/PHI, b = 1;
-      return [
-        [ 0,  b,  a], [ 0,  b, -a], [ 0, -b,  a], [ 0, -b, -a],
-        [ a,  0,  b], [ a,  0, -b], [-a,  0,  b], [-a,  0, -b],
-        [ b,  a,  0], [ b, -a,  0], [-b,  a,  0], [-b, -a,  0],
-        [ 1,  1,  1], [ 1,  1, -1], [ 1, -1,  1], [ 1, -1, -1],
-        [-1,  1,  1], [-1,  1, -1], [-1, -1,  1], [-1, -1, -1]
-      ];
-    })(),
-    faces: [
-      [0,2,14,4,12], [0,12,8,16,6], [0,6,18,2,0], [2,18,9,15,14], [4,14,15,5,13],
-      [12,4,13,1,8], [8,1,17,16,8], [6,16,17,10,18], [18,10,11,9,18], [14,15,9,11,4],
-      [1,13,5,7,17], [17,7,11,10,17]
-    ],
-    info: `
-<strong>Dodecahedron | D</strong><br>
-Platonic solid<br><br>
-<b>Vertices</b><br>20<br>
-<b>Edges</b><br>30<br>
-<b>Faces</b><br>12<br>
-<b>Vertex configuration</b><br>3.3.3.3.3<br>
-<b>Faces by type</b><br>12 pentagons<br>
-<b>Volume</b><br>≈7.663s³<br>
-<b>Surface area</b><br>≈20.646s²<br>
-<b>Sphericity</b><br>≈0.910<br>
-<b>Symmetry</b><br>Full icosahedral, Ih<br>
-<b>Order</b><br>120<br>
-<b>Properties</b><br>zonohedron<br>
-<b>Also known as</b><br>regular dodecahedron
-`
-  },
-  icosahedron: {
-    name: "Icosahedron",
-    symbol: "I",
-    vertices: (function(){
-      const PHI = (1 + Math.sqrt(5)) / 2;
-      return [
-        [0, 1, PHI], [0, -1, PHI], [0, 1, -PHI], [0, -1, -PHI],
-        [1, PHI, 0], [-1, PHI, 0], [1, -PHI, 0], [-1, -PHI, 0],
-        [PHI, 0, 1], [-PHI, 0, 1], [PHI, 0, -1], [-PHI, 0, -1]
-      ];
-    })(),
-    faces: [
-      [0,1,8],[0,8,4],[0,4,5],[0,5,9],[0,9,1],
-      [1,9,7],[1,7,6],[1,6,8],[2,3,10],[2,10,4],
-      [2,4,5],[2,5,11],[2,11,3],[3,11,7],[3,7,6],
-      [3,6,10],[4,8,10],[5,9,11],[6,7,11],[8,6,10]
-    ],
-    info: `
-<strong>Icosahedron | I</strong><br>
-Platonic solid<br><br>
-<b>Vertices</b><br>12<br>
-<b>Edges</b><br>30<br>
-<b>Faces</b><br>20<br>
-<b>Vertex configuration</b><br>5.5.5<br>
-<b>Faces by type</b><br>20 triangles<br>
-<b>Volume</b><br>≈2.1817s³<br>
-<b>Surface area</b><br>≈8.660s²<br>
-<b>Sphericity</b><br>≈0.939<br>
-<b>Symmetry</b><br>Full icosahedral, Ih<br>
-<b>Order</b><br>120<br>
-<b>Properties</b><br>deltahedron<br>
-<b>Also known as</b><br>regular icosahedron
-`
-  }
-};
+// Polyhedra data (vertices, faces, info) as before...
+
+// ... (use SOLIDS object from previous answer, unchanged)
 
 let scene, camera, renderer, controls, directionalLight;
 let mainSolidType = 'octahedron';
@@ -225,7 +47,14 @@ function init() {
   document.getElementById('darkModeToggle').addEventListener('click', () => {
     isDarkMode = !isDarkMode;
     document.body.classList.toggle('dark', isDarkMode);
-    scene.background = isDarkMode ? new THREE.Color(0x111111) : new THREE.Color(0xf5f5f5);
+    // Scene background
+    scene.background = isDarkMode ? new THREE.Color(0x181a20) : new THREE.Color(0xf5f5f5);
+    // Info panel colors handled by CSS
+    // Adjust lighting for dark mode
+    directionalLight.intensity = isDarkMode ? 0.45 : 0.8;
+    directionalLight.color.set(isDarkMode ? 0xccccff : 0xffffff);
+    // Update main solid material for dark mode
+    updateMainSolid();
   });
 
   document.getElementById('hue').addEventListener('input', updateMainSolid);
@@ -340,7 +169,6 @@ function updateMainSolid() {
 
   // For each face, build geometry, mesh, and edge lines
   solid.faces.forEach(faceVerts => {
-    // Triangulate if not triangle
     for (let i = 1; i < faceVerts.length - 1; i++) {
       const idx = [faceVerts[0], faceVerts[i], faceVerts[i+1]];
       const geo = new THREE.BufferGeometry();
@@ -359,7 +187,6 @@ function updateMainSolid() {
         wireframe: currentWireframe
       });
 
-      // Face mesh
       const mesh = new THREE.Mesh(geo, mat);
 
       // Face center and normal
@@ -374,7 +201,7 @@ function updateMainSolid() {
 
       // Edges
       const edgeGeo = new THREE.EdgesGeometry(geo, 1);
-      const edgeMat = new THREE.LineBasicMaterial({ color: 0x222222, linewidth: 2 });
+      const edgeMat = new THREE.LineBasicMaterial({ color: isDarkMode ? 0xffffff : 0x222222, linewidth: 2 });
       const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
       edgeLines.renderOrder = 1;
       mesh.add(edgeLines);
