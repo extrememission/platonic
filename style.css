@@ -30,6 +30,7 @@ body.dark {
   color: #222;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   line-height: 1.5;
+  transition: background 0.2s, color 0.2s;
 }
 body.dark #solidInfo {
   background: rgba(30,30,30,0.96);
@@ -38,6 +39,9 @@ body.dark #solidInfo {
 #solidInfo strong {
   font-size: 17px;
   color: #1976D2;
+}
+body.dark #solidInfo strong {
+  color: #90caf9;
 }
 #darkModeToggle {
   position: absolute;
