@@ -1,5 +1,3 @@
-// Complete script.js with robust Dodecahedron face construction
-
 const SOLIDS = {
   tetrahedron: {
     name: "Tetrahedron",
@@ -266,7 +264,7 @@ function initMiniScenes() {
   const solidTypes = [
     { type: 'tetrahedron', geo: () => new THREE.TetrahedronGeometry(0.8, 0), color: 0x00a8ff },
     { type: 'cube', geo: () => new THREE.BoxGeometry(1.2, 1.2, 1.2), color: 0x4cd137 },
-    { type: 'octahedron', geo: () => new THREE.OctahedronGeometry(0.8, 0), color: 0xe84118 },
+    { type: 'octahedron', geo: () => new THREE.OcahedronGeometry(0.8, 0), color: 0xe84118 },
     { type: 'dodecahedron', geo: () => new THREE.DodecahedronGeometry(0.8, 0), color: 0x9c88ff },
     { type: 'icosahedron', geo: () => new THREE.IcosahedronGeometry(0.8, 0), color: 0xfbc531 }
   ];
@@ -333,7 +331,7 @@ function updateMainSolid() {
   currentWireframe = document.getElementById('wireframe').checked;
 
   if (mainSolidType === 'dodecahedron') {
-    // Build pentagonal faces manually for best results
+    // Build pentagonal faces manually
     const vertices = SOLIDS.dodecahedron.vertices.map(v => new THREE.Vector3(...v).normalize().multiplyScalar(currentSize * 1.3));
     const faces = SOLIDS.dodecahedron.faces;
     mainSolidGroup = new THREE.Group();
@@ -388,6 +386,71 @@ function updateMainSolid() {
       let pentagonEdgeGeo = new THREE.EdgesGeometry(pentagonGeo);
       let edgeMat = new THREE.LineBasicMaterial({ color: isDarkMode ? 0xffffff : 0x222222, linewidth: 2 });
       let edgeLines = new THREE.LineSegments(pentagonEdgeGeo, edgeMat);
+      edgeLines.renderOrder = 1;
+      mesh.add(edgeLines);
+
+      mainSolidGroup.add(mesh);
+    });
+
+    scene.add(mainSolidGroup);
+    updateExplode();
+    updateSolidInfo();
+    return;
+  }
+
+  if (mainSolidType === 'cube') {
+    // Build square faces manually
+    const vertices = SOLIDS.cube.vertices.map(v => new THREE.Vector3(...v).normalize().multiplyScalar(currentSize * 1.3));
+    const faces = SOLIDS.cube.faces;
+    mainSolidGroup = new THREE.Group();
+    mainSolidGroup.position.set(0, 1, 0);
+
+    faces.forEach(faceVerts => {
+      // Get the 4 vertices for this face
+      let points = faceVerts.map(idx => vertices[idx]);
+      // Compute face center
+      let faceCenter = new THREE.Vector3();
+      points.forEach(pt => faceCenter.add(pt));
+      faceCenter.divideScalar(4);
+      let localPoints = points.map(pt => pt.clone().sub(faceCenter));
+      // Triangulate square: fan triangulation
+      let indices = [0,1,2, 0,2,3];
+      // Build geometry
+      let geo = new THREE.BufferGeometry().setFromPoints(localPoints);
+      geo.setIndex(indices);
+      geo.computeVertexNormals();
+
+      const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
+      const mat = new THREE.MeshStandardMaterial({
+        color,
+        roughness: 0.3,
+        metalness: 0.5,
+        flatShading: false,
+        transparent: true,
+        opacity: 1 - currentTransparency,
+        wireframe: currentWireframe
+      });
+
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.copy(faceCenter);
+
+      // Face normal (for explode effect)
+      let normal = new THREE.Vector3();
+      if (localPoints.length >= 3) {
+        normal.subVectors(localPoints[1], localPoints[0])
+          .cross(new THREE.Vector3().subVectors(localPoints[2], localPoints[0]))
+          .normalize();
+      }
+      mesh.userData = {
+        center: faceCenter.clone(),
+        normal: normal.clone()
+      };
+
+      // Edge geometry for the whole square (not just triangles)
+      let squareGeo = new THREE.BufferGeometry().setFromPoints(points);
+      let squareEdgeGeo = new THREE.EdgesGeometry(squareGeo);
+      let edgeMat = new THREE.LineBasicMaterial({ color: isDarkMode ? 0xffffff : 0x222222, linewidth: 2 });
+      let edgeLines = new THREE.LineSegments(squareEdgeGeo, edgeMat);
       edgeLines.renderOrder = 1;
       mesh.add(edgeLines);
 
@@ -464,7 +527,7 @@ function updateMainSolid() {
 
   solid.faces.forEach(faceVerts => {
     let faceCenter = new THREE.Vector3();
-    faceVerts.forEach(idx => faceCenter.add(vertices[idx]));
+    faceVerts.forEach(idx => faceCenter.add(vertices[idx]);
     faceCenter.divideScalar(faceVerts.length);
 
     let facePoints = faceVerts.map(idx => vertices[idx].clone().sub(faceCenter));
