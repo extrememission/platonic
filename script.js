@@ -1,199 +1,230 @@
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  font-family: 'Roboto', sans-serif;
-  background: #f5f5f5;
-  touch-action: manipulation;
-}
-body.dark {
-  background: #222;
-}
-#renderCanvas {
-  width: 100%;
-  height: calc(100% - 120px);
-  display: block;
-  touch-action: none;
-}
-#darkModeToggle {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 8px;
-  border-radius: 50%;
-  background: #2196F3;
-  color: white;
-  cursor: pointer;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-#controlsToast {
-  position: fixed;
-  bottom: 120px;
-  left: 0;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -2px 16px rgba(0,0,0,0.2);
-  z-index: 100;
-  transition: transform 0.3s ease-out;
-  transform: translateY(0);
-  max-height: 60vh;
-  overflow-y: auto;
-  padding: 10px 16px;
-}
-#controlsToast.hidden {
-  transform: translateY(calc(100% - 36px));
-}
-#controls {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding-bottom: 12px;
-}
-.control-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.control-row label {
-  font-size: 14px;
-  color: #555;
-  min-width: 100px;
-}
-.control-row input[type="range"] {
-  flex: 1;
-  max-width: 200px;
-  margin: 0;
-}
-.control-row select {
-  flex: 1;
-  max-width: 200px;
-  margin: 0;
-}
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 24px;
-  margin-left: 10px;
-}
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-}
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: .4s;
-}
-input:checked + .slider {
-  background-color: #2196F3;
-}
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
-}
-input:checked + .slider:before {
-  transform: translateX(26px);
-}
-.slider.round {
-  border-radius: 24px;
-}
-.slider.round:before {
-  border-radius: 50%;
-}
-#hideControlsBtn {
-  position: absolute;
-  bottom: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: transparent;
-  border: none;
-  color: #555;
-  cursor: pointer;
-  z-index: 101;
-  padding: 4px;
-  font-size: 24px;
-}
-#solidSelector {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 120px;
-  background: rgba(255, 255, 255, 0.95);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-  z-index: 99;
-}
-.solid-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-.solid-preview {
-  width: 60px;
-  height: 60px;
-  display: block;
-  border-radius: 8px;
-  background: #eee;
-}
-.solid-wrapper span {
-  font-size: 12px;
-  font-weight: 500;
-  color: #555;
-}
-@media (max-width: 600px) {
-  #solidSelector {
-    gap: 10px;
+let scene, camera, renderer, controls, mainSolid, directionalLight;
+let isDarkMode = false;
+let mainSolidType = 'octahedron';
+let mainSolidMaterial;
+let currentExplode = 0;
+let currentRotationSpeed = 0.01;
+let currentRotationDirection = 1;
+let currentSize = 1;
+let currentHue = 200, currentSaturation = 70, currentLightness = 70;
+let currentTransparency = 0;
+let currentWireframe = false;
+let miniScenes = [];
+
+function init() {
+  const container = document.getElementById('renderCanvas');
+  const width = window.innerWidth;
+  const height = window.innerHeight - 120; // Account for footer
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(width, height);
+  container.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf5f5f5);
+
+  camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+  camera.position.set(0, 2, 8);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+
+  directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  directionalLight.position.set(1, 1, 1);
+  scene.add(directionalLight);
+
+  mainSolidMaterial = new THREE.MeshStandardMaterial({
+    roughness: 0.3,
+    metalness: 0.5,
+    flatShading: false,
+    transparent: true,
+    opacity: 1,
+    wireframe: currentWireframe
+  });
+  updateMaterial();
+
+  // Initialize mini preview scenes
+  initMiniScenes();
+
+  // Initialize main solid (octahedron by default)
+  updateMainSolid();
+
+  // Dark mode toggle
+  document.getElementById('darkModeToggle').addEventListener('click', () => {
+    isDarkMode = !isDarkMode;
+    document.body.classList.toggle('dark', isDarkMode);
+    scene.background = isDarkMode ? new THREE.Color(0x111111) : new THREE.Color(0xf5f5f5);
+  });
+
+  // Controls
+  document.getElementById('hue').addEventListener('input', updateMaterial);
+  document.getElementById('saturation').addEventListener('input', updateMaterial);
+  document.getElementById('lightness').addEventListener('input', updateMaterial);
+  document.getElementById('transparency').addEventListener('input', updateMaterial);
+  document.getElementById('size').addEventListener('input', updateMainSolid);
+  document.getElementById('rotationSpeed').addEventListener('input', updateSpeed);
+  document.getElementById('rotationDirection').addEventListener('change', updateSpeed);
+  document.getElementById('explode').addEventListener('input', updateExplode);
+  document.getElementById('lightX').addEventListener('input', updateLight);
+  document.getElementById('lightY').addEventListener('input', updateLight);
+  document.getElementById('lightZ').addEventListener('input', updateLight);
+  document.getElementById('wireframe').addEventListener('change', updateWireframe);
+
+  // Mobile controls toast toggle
+  const controlsToast = document.getElementById('controlsToast');
+  const hideControlsBtn = document.getElementById('hideControlsBtn');
+  hideControlsBtn.addEventListener('click', () => {
+    controlsToast.classList.toggle('hidden');
+    hideControlsBtn.innerHTML = controlsToast.classList.contains('hidden') ?
+      'keyboard_arrow_up' : 'keyboard_arrow_down';
+  });
+
+  // Auto-show controls on mobile if hidden when footer is tapped
+  if (window.matchMedia('(max-width: 600px)').matches) {
+    document.getElementById('solidSelector').addEventListener('click', () => {
+      if (controlsToast.classList.contains('hidden')) {
+        controlsToast.classList.remove('hidden');
+        hideControlsBtn.innerHTML = 'keyboard_arrow_down';
+      }
+    });
   }
-  .solid-preview {
-    width: 50px;
-    height: 50px;
-  }
-  #controlsToast {
-    bottom: 120px;
-  }
-  #controlsToast.hidden {
-    transform: translateY(calc(100% - 36px));
-  }
+
+  window.addEventListener('resize', onWindowResize);
+  animate();
 }
-@media (min-width: 601px) {
-  #controlsToast {
-    width: 320px;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 140px;
-    border-radius: 16px;
-  }
-  #controlsToast.hidden {
-    transform: translateX(-50%) translateY(calc(100% - 36px));
-  }
+
+function initMiniScenes() {
+  const solidTypes = [
+    { type: 'tetrahedron', geo: () => new THREE.TetrahedronGeometry(1, 0), color: 0x00a8ff },
+    { type: 'cube', geo: () => new THREE.BoxGeometry(1.8, 1.8, 1.8), color: 0x4cd137 },
+    { type: 'octahedron', geo: () => new THREE.OctahedronGeometry(1.2, 0), color: 0xe84118 },
+    { type: 'dodecahedron', geo: () => new THREE.DodecahedronGeometry(1, 0), color: 0x9c88ff },
+    { type: 'icosahedron', geo: () => new THREE.IcosahedronGeometry(1, 0), color: 0xfbc531 }
+  ];
+
+  document.querySelectorAll('.solid-wrapper').forEach((wrapper, i) => {
+    const type = solidTypes[i];
+    const canvas = wrapper.querySelector('.solid-preview');
+    const miniRenderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true
+    });
+    miniRenderer.setSize(canvas.width, canvas.height);
+
+    const miniScene = new THREE.Scene();
+    miniScene.background = null;
+
+    const miniCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
+    miniCamera.position.z = 3;
+
+    const miniLight = new THREE.DirectionalLight(0xffffff, 1);
+    miniLight.position.set(1, 1, 1);
+    miniScene.add(miniLight);
+    miniScene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+    const miniMesh = new THREE.Mesh(
+      type.geo(),
+      new THREE.MeshStandardMaterial({
+        color: type.color,
+        roughness: 0.3,
+        metalness: 0.5,
+        flatShading: false
+      })
+    );
+    miniScene.add(miniMesh);
+
+    miniScenes.push({ scene: miniScene, camera: miniCamera, mesh: miniMesh, renderer: miniRenderer });
+
+    wrapper.addEventListener('click', () => {
+      mainSolidType = type.type;
+      updateMainSolid();
+    });
+  });
 }
+
+function animateMiniScenes() {
+  miniScenes.forEach(({ scene, camera, mesh, renderer }) => {
+    mesh.rotation.y += 0.01;
+    renderer.render(scene, camera);
+  });
+  requestAnimationFrame(animateMiniScenes);
+}
+animateMiniScenes();
+
+function updateMaterial() {
+  currentHue = parseInt(document.getElementById('hue').value);
+  currentSaturation = parseInt(document.getElementById('saturation').value);
+  currentLightness = parseInt(document.getElementById('lightness').value);
+  currentTransparency = parseInt(document.getElementById('transparency').value) / 100;
+  const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
+  mainSolidMaterial.color = color;
+  mainSolidMaterial.opacity = 1 - currentTransparency;
+  mainSolidMaterial.transparent = currentTransparency > 0;
+  if (mainSolid) mainSolid.material = mainSolidMaterial;
+}
+
+function updateWireframe() {
+  currentWireframe = document.getElementById('wireframe').checked;
+  mainSolidMaterial.wireframe = currentWireframe;
+  if (mainSolid) mainSolid.material = mainSolidMaterial;
+}
+
+function updateMainSolid() {
+  currentSize = parseFloat(document.getElementById('size').value);
+  if (mainSolid) scene.remove(mainSolid);
+
+  let geometry;
+  if (mainSolidType === 'tetrahedron') geometry = new THREE.TetrahedronGeometry(1, 0);
+  else if (mainSolidType === 'cube') geometry = new THREE.BoxGeometry(1.8, 1.8, 1.8);
+  else if (mainSolidType === 'octahedron') geometry = new THREE.OctahedronGeometry(1.2, 0);
+  else if (mainSolidType === 'dodecahedron') geometry = new THREE.DodecahedronGeometry(1, 0);
+  else if (mainSolidType === 'icosahedron') geometry = new THREE.IcosahedronGeometry(1, 0);
+
+  mainSolid = new THREE.Mesh(geometry, mainSolidMaterial);
+  mainSolid.position.set(0, 1, 0);
+  mainSolid.scale.set(currentSize, currentSize, currentSize);
+  scene.add(mainSolid);
+  updateExplode();
+}
+
+function updateExplode() {
+  currentExplode = parseFloat(document.getElementById('explode').value);
+  if (!mainSolid) return;
+  mainSolid.scale.set(currentSize * (1 + currentExplode), currentSize * (1 + currentExplode), currentSize * (1 + currentExplode));
+}
+
+function updateSpeed() {
+  currentRotationSpeed = parseFloat(document.getElementById('rotationSpeed').value);
+  currentRotationDirection = parseInt(document.getElementById('rotationDirection').value);
+}
+
+function updateLight() {
+  const x = parseFloat(document.getElementById('lightX').value);
+  const y = parseFloat(document.getElementById('lightY').value);
+  const z = parseFloat(document.getElementById('lightZ').value);
+  directionalLight.position.set(x, y, z);
+}
+
+function onWindowResize() {
+  const width = window.innerWidth;
+  const height = window.innerHeight - 120;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  if (mainSolid) {
+    mainSolid.rotation.y += currentRotationSpeed * currentRotationDirection;
+  }
+  renderer.render(scene, camera);
+}
+
+init();
