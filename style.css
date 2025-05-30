@@ -184,4 +184,19 @@ input:checked + .slider:before {
   height: 60px;
   display: block;
   border-radius: 8px;
-  background: #
+  background: #eee;
+}
+.solid-wrapper span {
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+}
+@media (max-width: 600px) {
+  #solidSelector {
+    gap: 10px;
+  }
+  .solid-preview {
+    width: 50px;
+    height: 50px;
+  }
+}
