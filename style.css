@@ -1,8 +1,8 @@
 html, body {
   margin: 0;
   padding: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
   font-family: 'Roboto', sans-serif;
   background: #f5f5f5;
@@ -12,36 +12,14 @@ body.dark {
   background: #222;
 }
 #renderCanvas {
-  width: 100%;
-  height: calc(100% - 120px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: calc(100vh - 120px); /* everything above the footer */
   display: block;
   touch-action: none;
-}
-#solidInfo {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  max-width: 350px;
-  background: rgba(255,255,255,0.96);
-  border-radius: 10px;
-  padding: 18px 18px 16px 18px;
-  z-index: 200;
-  font-size: 15px;
-  color: #222;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  line-height: 1.5;
-  transition: background 0.2s, color 0.2s;
-}
-body.dark #solidInfo {
-  background: rgba(30,30,30,0.96);
-  color: #eee;
-}
-#solidInfo strong {
-  font-size: 17px;
-  color: #1976D2;
-}
-body.dark #solidInfo strong {
-  color: #90caf9;
+  z-index: 1;
 }
 #darkModeToggle {
   position: absolute;
@@ -57,7 +35,35 @@ body.dark #solidInfo strong {
   align-items: center;
   justify-content: center;
 }
-#controlsModal {
+#showControlsBtn {
+  position: absolute;
+  top: 60px;
+  right: 10px;
+  background: #2196F3;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  z-index: 100;
+  padding: 8px;
+  font-size: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+#showInfoBtn {
+  position: absolute;
+  top: 110px;
+  right: 10px;
+  background: #2196F3;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  z-index: 100;
+  padding: 8px;
+  font-size: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+#controlsModal, #infoModal {
   position: fixed;
   top: 0;
   right: 0;
@@ -75,13 +81,7 @@ body.dark #solidInfo strong {
   padding: 16px;
   overflow-y: auto;
 }
-@media (max-width: 600px) {
-  #controlsModal {
-    width: calc(100% - 40px);
-    background: rgba(255, 255, 255, 0.9);
-  }
-}
-#controlsModal.active {
+#controlsModal.active, #infoModal.active {
   transform: translateX(0);
 }
 #controls {
@@ -158,7 +158,7 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
-#hideControlsBtn {
+#hideControlsBtn, #hideInfoBtn {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -170,25 +170,27 @@ input:checked + .slider:before {
   padding: 4px;
   font-size: 24px;
 }
-#showControlsBtn {
-  position: absolute;
-  top: 60px;
-  right: 10px;
-  background: #2196F3;
-  border: none;
-  border-radius: 50%;
-  color: white;
-  cursor: pointer;
-  z-index: 100;
-  padding: 8px;
-  font-size: 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+#solidInfo {
+  font-size: 15px;
+  color: #222;
+  line-height: 1.5;
+  padding: 8px 0 0 0;
+}
+body.dark #solidInfo {
+  color: #eee;
+}
+#solidInfo strong {
+  font-size: 17px;
+  color: #1976D2;
+}
+body.dark #solidInfo strong {
+  color: #90caf9;
 }
 #solidSelector {
   position: fixed;
   bottom: 0;
   left: 0;
-  width: 100%;
+  width: 100vw;
   height: 120px;
   background: rgba(255, 255, 255, 0.95);
   display: flex;
@@ -224,5 +226,10 @@ input:checked + .slider:before {
   .solid-preview {
     width: 50px;
     height: 50px;
+  }
+  #controlsModal, #infoModal {
+    width: 90vw;
+    max-width: 90vw;
+    padding: 8px;
   }
 }
