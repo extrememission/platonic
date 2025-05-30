@@ -74,24 +74,17 @@ function init() {
   document.getElementById('lightZ').addEventListener('input', updateLight);
   document.getElementById('wireframe').addEventListener('change', updateWireframe);
 
-  // Mobile controls toast toggle
-  const controlsToast = document.getElementById('controlsToast');
+  // Modal controls
+  const controlsModal = document.getElementById('controlsModal');
   const hideControlsBtn = document.getElementById('hideControlsBtn');
-  hideControlsBtn.addEventListener('click', () => {
-    controlsToast.classList.toggle('hidden');
-    hideControlsBtn.innerHTML = controlsToast.classList.contains('hidden') ?
-      'keyboard_arrow_up' : 'keyboard_arrow_down';
-  });
+  const showControlsBtn = document.getElementById('showControlsBtn');
 
-  // Auto-show controls on mobile if hidden when footer is tapped
-  if (window.matchMedia('(max-width: 600px)').matches) {
-    document.getElementById('solidSelector').addEventListener('click', () => {
-      if (controlsToast.classList.contains('hidden')) {
-        controlsToast.classList.remove('hidden');
-        hideControlsBtn.innerHTML = 'keyboard_arrow_down';
-      }
-    });
-  }
+  showControlsBtn.addEventListener('click', () => {
+    controlsModal.classList.add('active');
+  });
+  hideControlsBtn.addEventListener('click', () => {
+    controlsModal.classList.remove('active');
+  });
 
   window.addEventListener('resize', onWindowResize);
   animate();
