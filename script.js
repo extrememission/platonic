@@ -1,5 +1,5 @@
 let scene, camera, renderer, controls, directionalLight;
-let mainSolidType = 'box';
+let mainSolidType = 'tetrahedron';
 let mainSolidMesh = null;
 let currentRotationSpeed = 0.01;
 let currentRotationDirection = 1;
@@ -10,17 +10,19 @@ let currentWireframe = false;
 let miniScenes = [];
 let isDarkMode = false;
 
+// Solids in order: Platonic first, then others
 const solidTypes = [
+  { type: 'tetrahedron', name: 'Tetrahedron', color: 0x7f8c8d, info: 'A tetrahedron with four triangular faces.' },
+  { type: 'cube', name: 'Cube', color: 0x00a8ff, info: 'A cube with six square faces.' },
+  { type: 'octahedron', name: 'Octahedron', color: 0xe74c3c, info: 'An octahedron with eight triangular faces.' },
+  { type: 'dodecahedron', name: 'Dodecahedron', color: 0x8e44ad, info: 'A dodecahedron with twelve pentagonal faces.' },
+  { type: 'icosahedron', name: 'Icosahedron', color: 0x2ecc71, info: 'An icosahedron with twenty triangular faces.' },
   { type: 'box', name: 'Box', color: 0x00a8ff, info: 'A 3D box with six faces.' },
   { type: 'sphere', name: 'Sphere', color: 0x4cd137, info: 'A 3D sphere.' },
   { type: 'cylinder', name: 'Cylinder', color: 0xe84118, info: 'A 3D cylinder.' },
   { type: 'cone', name: 'Cone', color: 0x9c88ff, info: 'A 3D cone.' },
   { type: 'torus', name: 'Torus', color: 0xfbc531, info: 'A 3D torus (donut).' },
-  { type: 'torusKnot', name: 'Torus Knot', color: 0x00d2d3, info: 'A 3D torus knot.' },
-  { type: 'tetrahedron', name: 'Tetrahedron', color: 0x7f8c8d, info: 'A tetrahedron with four triangular faces.' },
-  { type: 'octahedron', name: 'Octahedron', color: 0xe74c3c, info: 'An octahedron with eight triangular faces.' },
-  { type: 'dodecahedron', name: 'Dodecahedron', color: 0x8e44ad, info: 'A dodecahedron with twelve pentagonal faces.' },
-  { type: 'icosahedron', name: 'Icosahedron', color: 0x2ecc71, info: 'An icosahedron with twenty triangular faces.' }
+  { type: 'torusKnot', name: 'Torus Knot', color: 0x00d2d3, info: 'A 3D torus knot.' }
 ];
 
 function init() {
@@ -120,6 +122,21 @@ function initMiniScenes() {
 
     let geometry;
     switch(type.type) {
+      case 'tetrahedron':
+        geometry = new THREE.TetrahedronGeometry(0.8, 0);
+        break;
+      case 'cube':
+        geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+        break;
+      case 'octahedron':
+        geometry = new THREE.OctahedronGeometry(0.8, 0);
+        break;
+      case 'dodecahedron':
+        geometry = new THREE.DodecahedronGeometry(0.8, 0);
+        break;
+      case 'icosahedron':
+        geometry = new THREE.IcosahedronGeometry(0.8, 0);
+        break;
       case 'box':
         geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
         break;
@@ -137,18 +154,6 @@ function initMiniScenes() {
         break;
       case 'torusKnot':
         geometry = new THREE.TorusKnotGeometry(0.5, 0.2, 100, 16);
-        break;
-      case 'tetrahedron':
-        geometry = new THREE.TetrahedronGeometry(0.8, 0);
-        break;
-      case 'octahedron':
-        geometry = new THREE.OctahedronGeometry(0.8, 0);
-        break;
-      case 'dodecahedron':
-        geometry = new THREE.DodecahedronGeometry(0.8, 0);
-        break;
-      case 'icosahedron':
-        geometry = new THREE.IcosahedronGeometry(0.8, 0);
         break;
     }
 
@@ -193,6 +198,21 @@ function updateMainSolid() {
 
   let geometry;
   switch(mainSolidType) {
+    case 'tetrahedron':
+      geometry = new THREE.TetrahedronGeometry(currentSize * 1.3, 0);
+      break;
+    case 'cube':
+      geometry = new THREE.BoxGeometry(currentSize * 1.3, currentSize * 1.3, currentSize * 1.3);
+      break;
+    case 'octahedron':
+      geometry = new THREE.OctahedronGeometry(currentSize * 1.3, 0);
+      break;
+    case 'dodecahedron':
+      geometry = new THREE.DodecahedronGeometry(currentSize * 1.3, 0);
+      break;
+    case 'icosahedron':
+      geometry = new THREE.IcosahedronGeometry(currentSize * 1.3, 0);
+      break;
     case 'box':
       geometry = new THREE.BoxGeometry(currentSize * 1.3, currentSize * 1.3, currentSize * 1.3);
       break;
@@ -210,18 +230,6 @@ function updateMainSolid() {
       break;
     case 'torusKnot':
       geometry = new THREE.TorusKnotGeometry(currentSize * 0.7, currentSize * 0.2, 100, 16);
-      break;
-    case 'tetrahedron':
-      geometry = new THREE.TetrahedronGeometry(currentSize * 1.3, 0);
-      break;
-    case 'octahedron':
-      geometry = new THREE.OctahedronGeometry(currentSize * 1.3, 0);
-      break;
-    case 'dodecahedron':
-      geometry = new THREE.DodecahedronGeometry(currentSize * 1.3, 0);
-      break;
-    case 'icosahedron':
-      geometry = new THREE.IcosahedronGeometry(currentSize * 1.3, 0);
       break;
   }
 
