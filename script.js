@@ -1,183 +1,6 @@
-const SOLIDS = {
-  tetrahedron: {
-    name: "Tetrahedron",
-    symbol: "T",
-    vertices: [
-      [1, 1, 1],
-      [-1, -1, 1],
-      [-1, 1, -1],
-      [1, -1, -1]
-    ],
-    faces: [
-      [0, 1, 2],
-      [0, 3, 1],
-      [0, 2, 3],
-      [1, 3, 2]
-    ],
-    info: `
-<strong>Tetrahedron | T</strong><br>
-Platonic solid<br><br>
-<b>Vertices</b><br>4<br>
-<b>Edges</b><br>6<br>
-<b>Faces</b><br>4<br>
-<b>Vertex configuration</b><br>3.3.3<br>
-<b>Faces by type</b><br>4 triangles<br>
-<b>Volume</b><br>≈0.118s³<br>
-<b>Surface area</b><br>≈1.732s²<br>
-<b>Sphericity</b><br>≈0.671<br>
-<b>Symmetry</b><br>Full tetrahedral, Td<br>
-<b>Order</b><br>24<br>
-<b>Properties</b><br>deltahedron<br>
-<b>Also known as</b><br>triangular pyramid, digonal antiprism, disphenoid
-`
-  },
-  cube: {
-    name: "Cube",
-    symbol: "C",
-    vertices: [
-      [-1, -1, -1],
-      [-1, -1, 1],
-      [-1, 1, -1],
-      [-1, 1, 1],
-      [1, -1, -1],
-      [1, -1, 1],
-      [1, 1, -1],
-      [1, 1, 1]
-    ],
-    faces: [
-      [0,1,3,2],
-      [4,6,7,5],
-      [0,4,5,1],
-      [2,3,7,6],
-      [0,2,6,4],
-      [1,5,7,3]
-    ],
-    info: `
-<strong>Cube | C</strong><br>
-Platonic solid<br><br>
-<b>Vertices</b><br>8<br>
-<b>Edges</b><br>12<br>
-<b>Faces</b><br>6<br>
-<b>Vertex configuration</b><br>4.4.4<br>
-<b>Faces by type</b><br>6 squares<br>
-<b>Volume</b><br>s³<br>
-<b>Surface area</b><br>6s²<br>
-<b>Sphericity</b><br>≈0.806<br>
-<b>Symmetry</b><br>Full octahedral, Oh<br>
-<b>Order</b><br>48<br>
-<b>Properties</b><br>zonohedron, regular hexahedron<br>
-<b>Also known as</b><br>regular hexahedron
-`
-  },
-  octahedron: {
-    name: "Octahedron",
-    symbol: "O",
-    vertices: [
-      [1, 0, 0],
-      [-1, 0, 0],
-      [0, 1, 0],
-      [0, -1, 0],
-      [0, 0, 1],
-      [0, 0, -1]
-    ],
-    faces: [
-      [0,2,4],
-      [2,1,4],
-      [1,3,4],
-      [3,0,4],
-      [0,5,2],
-      [2,5,1],
-      [1,5,3],
-      [3,5,0]
-    ],
-    info: `
-<strong>Octahedron | O</strong><br>
-Platonic solid<br><br>
-<b>Vertices</b><br>6<br>
-<b>Edges</b><br>12<br>
-<b>Faces</b><br>8<br>
-<b>Vertex configuration</b><br>4.4.4<br>
-<b>Faces by type</b><br>8 triangles<br>
-<b>Volume</b><br>≈0.471s³<br>
-<b>Surface area</b><br>≈3.464s²<br>
-<b>Sphericity</b><br>≈0.846<br>
-<b>Symmetry</b><br>Full octahedral, Oh<br>
-<b>Order</b><br>48<br>
-<b>Properties</b><br>deltahedron<br>
-<b>Also known as</b><br>regular octahedron
-`
-  },
-  dodecahedron: {
-    name: "Dodecahedron",
-    symbol: "D",
-    vertices: (function(){
-      const PHI = (1 + Math.sqrt(5)) / 2;
-      const a = 1 / PHI, b = 1;
-      return [
-        [ 0,  b,  a], [ 0,  b, -a], [ 0, -b,  a], [ 0, -b, -a],
-        [ a,  0,  b], [ a,  0, -b], [-a,  0,  b], [-a,  0, -b],
-        [ b,  a,  0], [ b, -a,  0], [-b,  a,  0], [-b, -a,  0],
-        [ 1,  1,  1], [ 1,  1, -1], [ 1, -1,  1], [ 1, -1, -1],
-        [-1,  1,  1], [-1,  1, -1], [-1, -1,  1], [-1, -1, -1]
-      ];
-    })(),
-    faces: [
-      [16,0,2,18,6],
-      [16,10,8,12,0],
-      [0,12,4,14,2],
-      [2,14,9,11,18],
-      [18,11,19,7,6],
-      [6,7,17,10,16],
-      [1,17,10,8,13],
-      [13,8,12,4,5],
-      [5,4,14,9,15],
-      [15,9,11,19,3],
-      [3,19,7,17,1],
-      [1,13,5,15,3]
-    ],
-    info: `
-<strong>Dodecahedron | D</strong><br>
-Platonic solid<br><br>
-<b>Vertices</b><br>20<br>
-<b>Edges</b><br>30<br>
-<b>Faces</b><br>12<br>
-<b>Vertex configuration</b><br>3.3.3.3.3<br>
-<b>Faces by type</b><br>12 pentagons<br>
-<b>Volume</b><br>≈7.663s³<br>
-<b>Surface area</b><br>≈20.646s²<br>
-<b>Sphericity</b><br>≈0.910<br>
-<b>Symmetry</b><br>Full icosahedral, Ih<br>
-<b>Order</b><br>120<br>
-<b>Properties</b><br>zonohedron<br>
-<b>Also known as</b><br>regular dodecahedron
-`
-  },
-  icosahedron: {
-    name: "Icosahedron",
-    symbol: "I",
-    info: `
-<strong>Icosahedron | I</strong><br>
-Platonic solid<br><br>
-<b>Vertices</b><br>12<br>
-<b>Edges</b><br>30<br>
-<b>Faces</b><br>20<br>
-<b>Vertex configuration</b><br>5.5.5<br>
-<b>Faces by type</b><br>20 triangles<br>
-<b>Volume</b><br>≈2.1817s³<br>
-<b>Surface area</b><br>≈8.660s²<br>
-<b>Sphericity</b><br>≈0.939<br>
-<b>Symmetry</b><br>Full icosahedral, Ih<br>
-<b>Order</b><br>120<br>
-<b>Properties</b><br>deltahedron<br>
-<b>Also known as</b><br>regular icosahedron
-`
-  }
-};
-
 let scene, camera, renderer, controls, directionalLight;
-let mainSolidType = 'octahedron';
-let mainSolidGroup = null;
-let currentExplode = 0;
+let mainSolidType = 'box';
+let mainSolidMesh = null;
 let currentRotationSpeed = 0.01;
 let currentRotationDirection = 1;
 let currentSize = 1;
@@ -186,6 +9,19 @@ let currentTransparency = 0;
 let currentWireframe = false;
 let miniScenes = [];
 let isDarkMode = false;
+
+const solidTypes = [
+  { type: 'box', name: 'Box', color: 0x00a8ff, info: 'A 3D box with six faces.' },
+  { type: 'sphere', name: 'Sphere', color: 0x4cd137, info: 'A 3D sphere.' },
+  { type: 'cylinder', name: 'Cylinder', color: 0xe84118, info: 'A 3D cylinder.' },
+  { type: 'cone', name: 'Cone', color: 0x9c88ff, info: 'A 3D cone.' },
+  { type: 'torus', name: 'Torus', color: 0xfbc531, info: 'A 3D torus (donut).' },
+  { type: 'torusKnot', name: 'Torus Knot', color: 0x00d2d3, info: 'A 3D torus knot.' },
+  { type: 'tetrahedron', name: 'Tetrahedron', color: 0x7f8c8d, info: 'A tetrahedron with four triangular faces.' },
+  { type: 'octahedron', name: 'Octahedron', color: 0xe74c3c, info: 'An octahedron with eight triangular faces.' },
+  { type: 'dodecahedron', name: 'Dodecahedron', color: 0x8e44ad, info: 'A dodecahedron with twelve pentagonal faces.' },
+  { type: 'icosahedron', name: 'Icosahedron', color: 0x2ecc71, info: 'An icosahedron with twenty triangular faces.' }
+];
 
 function init() {
   const container = document.getElementById('renderCanvas');
@@ -232,7 +68,6 @@ function init() {
   document.getElementById('size').addEventListener('input', updateMainSolid);
   document.getElementById('rotationSpeed').addEventListener('input', updateSpeed);
   document.getElementById('rotationDirection').addEventListener('change', updateSpeed);
-  document.getElementById('explode').addEventListener('input', updateExplode);
   document.getElementById('wireframe').addEventListener('change', updateMainSolid);
 
   const controlsModal = document.getElementById('controlsModal');
@@ -261,14 +96,6 @@ function init() {
 }
 
 function initMiniScenes() {
-  const solidTypes = [
-    { type: 'tetrahedron', geo: () => new THREE.TetrahedronGeometry(0.8, 0), color: 0x00a8ff },
-    { type: 'cube', geo: () => new THREE.BoxGeometry(1.2, 1.2, 1.2), color: 0x4cd137 },
-    { type: 'octahedron', geo: () => new THREE.OcahedronGeometry(0.8, 0), color: 0xe84118 },
-    { type: 'dodecahedron', geo: () => new THREE.DodecahedronGeometry(0.8, 0), color: 0x9c88ff },
-    { type: 'icosahedron', geo: () => new THREE.IcosahedronGeometry(0.8, 0), color: 0xfbc531 }
-  ];
-
   const wrappers = document.querySelectorAll('.solid-wrapper');
   wrappers.forEach((wrapper, i) => {
     const type = solidTypes[i];
@@ -291,8 +118,42 @@ function initMiniScenes() {
     miniScene.add(miniLight);
     miniScene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
+    let geometry;
+    switch(type.type) {
+      case 'box':
+        geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+        break;
+      case 'sphere':
+        geometry = new THREE.SphereGeometry(0.5, 32, 32);
+        break;
+      case 'cylinder':
+        geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
+        break;
+      case 'cone':
+        geometry = new THREE.ConeGeometry(0.6, 1.2, 32);
+        break;
+      case 'torus':
+        geometry = new THREE.TorusGeometry(0.5, 0.2, 16, 100);
+        break;
+      case 'torusKnot':
+        geometry = new THREE.TorusKnotGeometry(0.5, 0.2, 100, 16);
+        break;
+      case 'tetrahedron':
+        geometry = new THREE.TetrahedronGeometry(0.8, 0);
+        break;
+      case 'octahedron':
+        geometry = new THREE.OctahedronGeometry(0.8, 0);
+        break;
+      case 'dodecahedron':
+        geometry = new THREE.DodecahedronGeometry(0.8, 0);
+        break;
+      case 'icosahedron':
+        geometry = new THREE.IcosahedronGeometry(0.8, 0);
+        break;
+    }
+
     const miniMesh = new THREE.Mesh(
-      type.geo(),
+      geometry,
       new THREE.MeshStandardMaterial({
         color: type.color,
         roughness: 0.3,
@@ -321,7 +182,7 @@ function animateMiniScenes() {
 animateMiniScenes();
 
 function updateMainSolid() {
-  if (mainSolidGroup) scene.remove(mainSolidGroup);
+  if (mainSolidMesh) scene.remove(mainSolidMesh);
 
   currentHue = parseInt(document.getElementById('hue').value);
   currentSaturation = parseInt(document.getElementById('saturation').value);
@@ -330,261 +191,61 @@ function updateMainSolid() {
   currentSize = parseFloat(document.getElementById('size').value);
   currentWireframe = document.getElementById('wireframe').checked;
 
-  if (mainSolidType === 'dodecahedron') {
-    // Build pentagonal faces manually
-    const vertices = SOLIDS.dodecahedron.vertices.map(v => new THREE.Vector3(...v).normalize().multiplyScalar(currentSize * 1.3));
-    const faces = SOLIDS.dodecahedron.faces;
-    mainSolidGroup = new THREE.Group();
-    mainSolidGroup.position.set(0, 1, 0);
-
-    faces.forEach(faceVerts => {
-      // Get the 5 vertices for this face
-      let points = faceVerts.map(idx => vertices[idx]);
-      // Compute face center
-      let faceCenter = new THREE.Vector3();
-      points.forEach(pt => faceCenter.add(pt));
-      faceCenter.divideScalar(5);
-      let localPoints = points.map(pt => pt.clone().sub(faceCenter));
-      // Triangulate pentagon: fan triangulation
-      let indices = [];
-      for (let i = 1; i < localPoints.length - 1; i++) {
-        indices.push(0, i, i + 1);
-      }
-      // Build geometry
-      let geo = new THREE.BufferGeometry().setFromPoints(localPoints);
-      geo.setIndex(indices);
-      geo.computeVertexNormals();
-
-      const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
-      const mat = new THREE.MeshStandardMaterial({
-        color,
-        roughness: 0.3,
-        metalness: 0.5,
-        flatShading: false,
-        transparent: true,
-        opacity: 1 - currentTransparency,
-        wireframe: currentWireframe
-      });
-
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.copy(faceCenter);
-
-      // Face normal (for explode effect)
-      let normal = new THREE.Vector3();
-      if (localPoints.length >= 3) {
-        normal.subVectors(localPoints[1], localPoints[0])
-          .cross(new THREE.Vector3().subVectors(localPoints[2], localPoints[0]))
-          .normalize();
-      }
-      mesh.userData = {
-        center: faceCenter.clone(),
-        normal: normal.clone()
-      };
-
-      // Edge geometry for the whole pentagon (not just triangles)
-      let pentagonGeo = new THREE.BufferGeometry().setFromPoints(points);
-      let pentagonEdgeGeo = new THREE.EdgesGeometry(pentagonGeo);
-      let edgeMat = new THREE.LineBasicMaterial({ color: isDarkMode ? 0xffffff : 0x222222, linewidth: 2 });
-      let edgeLines = new THREE.LineSegments(pentagonEdgeGeo, edgeMat);
-      edgeLines.renderOrder = 1;
-      mesh.add(edgeLines);
-
-      mainSolidGroup.add(mesh);
-    });
-
-    scene.add(mainSolidGroup);
-    updateExplode();
-    updateSolidInfo();
-    return;
+  let geometry;
+  switch(mainSolidType) {
+    case 'box':
+      geometry = new THREE.BoxGeometry(currentSize * 1.3, currentSize * 1.3, currentSize * 1.3);
+      break;
+    case 'sphere':
+      geometry = new THREE.SphereGeometry(currentSize * 0.9, 32, 32);
+      break;
+    case 'cylinder':
+      geometry = new THREE.CylinderGeometry(currentSize * 0.7, currentSize * 0.7, currentSize * 1.4, 32);
+      break;
+    case 'cone':
+      geometry = new THREE.ConeGeometry(currentSize * 0.7, currentSize * 1.4, 32);
+      break;
+    case 'torus':
+      geometry = new THREE.TorusGeometry(currentSize * 0.7, currentSize * 0.2, 16, 100);
+      break;
+    case 'torusKnot':
+      geometry = new THREE.TorusKnotGeometry(currentSize * 0.7, currentSize * 0.2, 100, 16);
+      break;
+    case 'tetrahedron':
+      geometry = new THREE.TetrahedronGeometry(currentSize * 1.3, 0);
+      break;
+    case 'octahedron':
+      geometry = new THREE.OctahedronGeometry(currentSize * 1.3, 0);
+      break;
+    case 'dodecahedron':
+      geometry = new THREE.DodecahedronGeometry(currentSize * 1.3, 0);
+      break;
+    case 'icosahedron':
+      geometry = new THREE.IcosahedronGeometry(currentSize * 1.3, 0);
+      break;
   }
 
-  if (mainSolidType === 'cube') {
-    // Build square faces manually
-    const vertices = SOLIDS.cube.vertices.map(v => new THREE.Vector3(...v).normalize().multiplyScalar(currentSize * 1.3));
-    const faces = SOLIDS.cube.faces;
-    mainSolidGroup = new THREE.Group();
-    mainSolidGroup.position.set(0, 1, 0);
-
-    faces.forEach(faceVerts => {
-      // Get the 4 vertices for this face
-      let points = faceVerts.map(idx => vertices[idx]);
-      // Compute face center
-      let faceCenter = new THREE.Vector3();
-      points.forEach(pt => faceCenter.add(pt));
-      faceCenter.divideScalar(4);
-      let localPoints = points.map(pt => pt.clone().sub(faceCenter));
-      // Triangulate square: fan triangulation
-      let indices = [0,1,2, 0,2,3];
-      // Build geometry
-      let geo = new THREE.BufferGeometry().setFromPoints(localPoints);
-      geo.setIndex(indices);
-      geo.computeVertexNormals();
-
-      const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
-      const mat = new THREE.MeshStandardMaterial({
-        color,
-        roughness: 0.3,
-        metalness: 0.5,
-        flatShading: false,
-        transparent: true,
-        opacity: 1 - currentTransparency,
-        wireframe: currentWireframe
-      });
-
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.copy(faceCenter);
-
-      // Face normal (for explode effect)
-      let normal = new THREE.Vector3();
-      if (localPoints.length >= 3) {
-        normal.subVectors(localPoints[1], localPoints[0])
-          .cross(new THREE.Vector3().subVectors(localPoints[2], localPoints[0]))
-          .normalize();
-      }
-      mesh.userData = {
-        center: faceCenter.clone(),
-        normal: normal.clone()
-      };
-
-      // Edge geometry for the whole square (not just triangles)
-      let squareGeo = new THREE.BufferGeometry().setFromPoints(points);
-      let squareEdgeGeo = new THREE.EdgesGeometry(squareGeo);
-      let edgeMat = new THREE.LineBasicMaterial({ color: isDarkMode ? 0xffffff : 0x222222, linewidth: 2 });
-      let edgeLines = new THREE.LineSegments(squareEdgeGeo, edgeMat);
-      edgeLines.renderOrder = 1;
-      mesh.add(edgeLines);
-
-      mainSolidGroup.add(mesh);
-    });
-
-    scene.add(mainSolidGroup);
-    updateExplode();
-    updateSolidInfo();
-    return;
-  }
-
-  if (mainSolidType === 'icosahedron') {
-    // Use built-in geometry, split into triangles for explode
-    let geometry = new THREE.IcosahedronGeometry(currentSize * 1.3, 0);
-    geometry = geometry.toNonIndexed();
-    const pos = geometry.attributes.position;
-    mainSolidGroup = new THREE.Group();
-    mainSolidGroup.position.set(0, 1, 0);
-
-    for (let i = 0; i < pos.count; i += 3) {
-      const vA = new THREE.Vector3().fromBufferAttribute(pos, i);
-      const vB = new THREE.Vector3().fromBufferAttribute(pos, i + 1);
-      const vC = new THREE.Vector3().fromBufferAttribute(pos, i + 2);
-
-      const faceCenter = new THREE.Vector3().add(vA).add(vB).add(vC).divideScalar(3);
-      const facePoints = [vA.clone().sub(faceCenter), vB.clone().sub(faceCenter), vC.clone().sub(faceCenter)];
-      const geo = new THREE.BufferGeometry().setFromPoints(facePoints);
-      geo.setIndex([0, 1, 2]);
-      geo.computeVertexNormals();
-
-      const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
-      const mat = new THREE.MeshStandardMaterial({
-        color,
-        roughness: 0.3,
-        metalness: 0.5,
-        flatShading: false,
-        transparent: true,
-        opacity: 1 - currentTransparency,
-        wireframe: currentWireframe
-      });
-
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.copy(faceCenter);
-
-      const normal = new THREE.Vector3().subVectors(facePoints[1], facePoints[0])
-        .cross(new THREE.Vector3().subVectors(facePoints[2], facePoints[0]))
-        .normalize();
-
-      mesh.userData = {
-        center: faceCenter.clone(),
-        normal: normal.clone()
-      };
-
-      const edgeGeo = new THREE.EdgesGeometry(geo, 1);
-      const edgeMat = new THREE.LineBasicMaterial({ color: isDarkMode ? 0xffffff : 0x222222, linewidth: 2 });
-      const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
-      edgeLines.renderOrder = 1;
-      mesh.add(edgeLines);
-
-      mainSolidGroup.add(mesh);
-    }
-    scene.add(mainSolidGroup);
-    updateExplode();
-    updateSolidInfo();
-    return;
-  }
-
-  // For other solids, use manual face construction
-  const solid = SOLIDS[mainSolidType];
-  const vertices = solid.vertices.map(v => new THREE.Vector3(...v).normalize().multiplyScalar(currentSize * 1.3));
-  mainSolidGroup = new THREE.Group();
-  mainSolidGroup.position.set(0, 1, 0);
-
-  solid.faces.forEach(faceVerts => {
-    let faceCenter = new THREE.Vector3();
-    faceVerts.forEach(idx => faceCenter.add(vertices[idx]);
-    faceCenter.divideScalar(faceVerts.length);
-
-    let facePoints = faceVerts.map(idx => vertices[idx].clone().sub(faceCenter));
-    let geo = new THREE.BufferGeometry().setFromPoints(facePoints);
-    let indices = [];
-    for (let i = 1; i < facePoints.length - 1; i++) {
-      indices.push(0, i, i + 1);
-    }
-    geo.setIndex(indices);
-    geo.computeVertexNormals();
-
-    const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
-    const mat = new THREE.MeshStandardMaterial({
-      color,
-      roughness: 0.3,
-      metalness: 0.5,
-      flatShading: false,
-      transparent: true,
-      opacity: 1 - currentTransparency,
-      wireframe: currentWireframe
-    });
-
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.copy(faceCenter);
-
-    let normal = new THREE.Vector3();
-    if (facePoints.length >= 3) {
-      normal.subVectors(facePoints[1], facePoints[0])
-        .cross(new THREE.Vector3().subVectors(facePoints[2], facePoints[0]))
-        .normalize();
-    }
-    mesh.userData = {
-      center: faceCenter.clone(),
-      normal: normal.clone()
-    };
-
-    const edgeGeo = new THREE.EdgesGeometry(geo, 1);
-    const edgeMat = new THREE.LineBasicMaterial({ color: isDarkMode ? 0xffffff : 0x222222, linewidth: 2 });
-    const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
-    edgeLines.renderOrder = 1;
-    mesh.add(edgeLines);
-
-    mainSolidGroup.add(mesh);
+  const color = new THREE.Color(`hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`);
+  const mat = new THREE.MeshStandardMaterial({
+    color,
+    roughness: 0.3,
+    metalness: 0.5,
+    flatShading: false,
+    transparent: true,
+    opacity: 1 - currentTransparency,
+    wireframe: currentWireframe
   });
 
-  scene.add(mainSolidGroup);
-  updateExplode();
-  updateSolidInfo();
-}
+  mainSolidMesh = new THREE.Mesh(geometry, mat);
+  mainSolidMesh.position.set(0, 1, 0);
+  scene.add(mainSolidMesh);
 
-function updateExplode() {
-  currentExplode = parseFloat(document.getElementById('explode').value);
-  if (!mainSolidGroup) return;
-  mainSolidGroup.children.forEach(face => {
-    const { center, normal } = face.userData;
-    face.position.copy(center).add(normal.clone().multiplyScalar(currentExplode));
-  });
+  // Update info panel
+  const solidInfo = solidTypes.find(s => s.type === mainSolidType);
+  document.getElementById('solidInfo').innerHTML = `
+    <strong>${solidInfo.name}</strong><br>
+    ${solidInfo.info}
+  `;
 }
 
 function updateSpeed() {
@@ -597,10 +258,6 @@ function updateLight() {
   const y = parseFloat(document.getElementById('lightY')?.value || 1);
   const z = parseFloat(document.getElementById('lightZ')?.value || 1);
   directionalLight.position.set(x, y, z);
-}
-
-function updateSolidInfo() {
-  document.getElementById('solidInfo').innerHTML = SOLIDS[mainSolidType].info;
 }
 
 function onWindowResize() {
@@ -626,8 +283,8 @@ function resizeThreeCanvas() {
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
-  if (mainSolidGroup) {
-    mainSolidGroup.rotation.y += currentRotationSpeed * currentRotationDirection;
+  if (mainSolidMesh) {
+    mainSolidMesh.rotation.y += currentRotationSpeed * currentRotationDirection;
   }
   renderer.render(scene, camera);
 }
