@@ -10,19 +10,23 @@ let currentWireframe = false;
 let miniScenes = [];
 let isDarkMode = false;
 
-// Solids in order: Platonic first, then others
 const solidTypes = [
+  // Platonic solids
   { type: 'tetrahedron', name: 'Tetrahedron', color: 0x7f8c8d, info: 'A tetrahedron with four triangular faces.' },
   { type: 'cube', name: 'Cube', color: 0x00a8ff, info: 'A cube with six square faces.' },
   { type: 'octahedron', name: 'Octahedron', color: 0xe74c3c, info: 'An octahedron with eight triangular faces.' },
   { type: 'dodecahedron', name: 'Dodecahedron', color: 0x8e44ad, info: 'A dodecahedron with twelve pentagonal faces.' },
   { type: 'icosahedron', name: 'Icosahedron', color: 0x2ecc71, info: 'An icosahedron with twenty triangular faces.' },
+  // Other geometries
   { type: 'box', name: 'Box', color: 0x00a8ff, info: 'A 3D box with six faces.' },
   { type: 'sphere', name: 'Sphere', color: 0x4cd137, info: 'A 3D sphere.' },
   { type: 'cylinder', name: 'Cylinder', color: 0xe84118, info: 'A 3D cylinder.' },
   { type: 'cone', name: 'Cone', color: 0x9c88ff, info: 'A 3D cone.' },
   { type: 'torus', name: 'Torus', color: 0xfbc531, info: 'A 3D torus (donut).' },
-  { type: 'torusKnot', name: 'Torus Knot', color: 0x00d2d3, info: 'A 3D torus knot.' }
+  { type: 'torusKnot', name: 'Torus Knot', color: 0x00d2d3, info: 'A 3D torus knot.' },
+  { type: 'plane', name: 'Plane', color: 0x3498db, info: 'A flat 2D plane in 3D space.' },
+  { type: 'ring', name: 'Ring', color: 0x9b59b6, info: 'A flat ring or annulus.' },
+  { type: 'circle', name: 'Circle', color: 0x1abc9c, info: 'A flat circle.' }
 ];
 
 function init() {
@@ -34,7 +38,7 @@ function init() {
   renderer.setSize(width, height);
   container.appendChild(renderer.domElement);
 
-  scene = new THREE.Scene();
+  scene = new THREE.ScScene();
   scene.background = new THREE.Color(0xf5f5f5);
 
   camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
@@ -126,6 +130,7 @@ function initMiniScenes() {
         geometry = new THREE.TetrahedronGeometry(0.8, 0);
         break;
       case 'cube':
+      case 'box':
         geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
         break;
       case 'octahedron':
@@ -137,11 +142,8 @@ function initMiniScenes() {
       case 'icosahedron':
         geometry = new THREE.IcosahedronGeometry(0.8, 0);
         break;
-      case 'box':
-        geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
-        break;
       case 'sphere':
-        geometry = new THREE.SphereGeometry(0.5, 32, 32);
+        geometry = new THREE.SSphereGeometry(0.5, 32, 32);
         break;
       case 'cylinder':
         geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
@@ -154,6 +156,15 @@ function initMiniScenes() {
         break;
       case 'torusKnot':
         geometry = new THREE.TorusKnotGeometry(0.5, 0.2, 100, 16);
+        break;
+      case 'plane':
+        geometry = new THREE.PlaneGeometry(1, 1);
+        break;
+      case 'ring':
+        geometry = new THREE.RingGeometry(0.5, 1, 32);
+        break;
+      case 'circle':
+        geometry = new THREE.CircleGeometry(0.8, 32);
         break;
     }
 
@@ -202,6 +213,7 @@ function updateMainSolid() {
       geometry = new THREE.TetrahedronGeometry(currentSize * 1.3, 0);
       break;
     case 'cube':
+    case 'box':
       geometry = new THREE.BoxGeometry(currentSize * 1.3, currentSize * 1.3, currentSize * 1.3);
       break;
     case 'octahedron':
@@ -212,9 +224,6 @@ function updateMainSolid() {
       break;
     case 'icosahedron':
       geometry = new THREE.IcosahedronGeometry(currentSize * 1.3, 0);
-      break;
-    case 'box':
-      geometry = new THREE.BoxGeometry(currentSize * 1.3, currentSize * 1.3, currentSize * 1.3);
       break;
     case 'sphere':
       geometry = new THREE.SphereGeometry(currentSize * 0.9, 32, 32);
@@ -230,6 +239,15 @@ function updateMainSolid() {
       break;
     case 'torusKnot':
       geometry = new THREE.TorusKnotGeometry(currentSize * 0.7, currentSize * 0.2, 100, 16);
+      break;
+    case 'plane':
+      geometry = new THREE.PlaneGeometry(currentSize * 1.5, currentSize * 1.5);
+      break;
+    case 'ring':
+      geometry = new THREE.RingGeometry(currentSize * 0.5, currentSize * 1, 32);
+      break;
+    case 'circle':
+      geometry = new THREE.CircleGeometry(currentSize * 0.8, 32);
       break;
   }
 
