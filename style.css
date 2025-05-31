@@ -16,7 +16,7 @@ body.dark {
   top: 0;
   left: 0;
   width: 100vw;
-  height: calc(100vh - 120px); /* everything above the footer */
+  height: calc(100vh - 120px);
   display: block;
   touch-action: none;
   z-index: 1;
@@ -194,11 +194,20 @@ body.dark #solidInfo strong {
   height: 120px;
   background: rgba(255, 255, 255, 0.95);
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  gap: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
   box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
   z-index: 99;
+}
+#solidSelector .solid-row {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  gap: 20px;
+  padding: 0 20px;
 }
 .solid-wrapper {
   display: flex;
@@ -206,6 +215,7 @@ body.dark #solidInfo strong {
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  flex: 0 0 auto;
 }
 .solid-preview {
   width: 60px;
