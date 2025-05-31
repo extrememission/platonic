@@ -11,13 +11,11 @@ let miniScenes = [];
 let isDarkMode = false;
 
 const solidTypes = [
-  // Platonic solids
   { type: 'tetrahedron', name: 'Tetrahedron', color: 0x7f8c8d, info: 'A tetrahedron with four triangular faces.' },
   { type: 'cube', name: 'Cube', color: 0x00a8ff, info: 'A cube with six square faces.' },
   { type: 'octahedron', name: 'Octahedron', color: 0xe74c3c, info: 'An octahedron with eight triangular faces.' },
   { type: 'dodecahedron', name: 'Dodecahedron', color: 0x8e44ad, info: 'A dodecahedron with twelve pentagonal faces.' },
   { type: 'icosahedron', name: 'Icosahedron', color: 0x2ecc71, info: 'An icosahedron with twenty triangular faces.' },
-  // Other geometries
   { type: 'box', name: 'Box', color: 0x00a8ff, info: 'A 3D box with six faces.' },
   { type: 'sphere', name: 'Sphere', color: 0x4cd137, info: 'A 3D sphere.' },
   { type: 'cylinder', name: 'Cylinder', color: 0xe84118, info: 'A 3D cylinder.' },
@@ -38,10 +36,10 @@ function init() {
   renderer.setSize(width, height);
   container.appendChild(renderer.domElement);
 
-  scene = new THREE.ScScene();
+  scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf5f5f5);
 
-  camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+  camera = new THREE.PPerspectiveCamera(75, width / height, 0.1, 1000);
   camera.position.set(0, 2, 8);
 
   controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -143,7 +141,7 @@ function initMiniScenes() {
         geometry = new THREE.IcosahedronGeometry(0.8, 0);
         break;
       case 'sphere':
-        geometry = new THREE.SSphereGeometry(0.5, 32, 32);
+        geometry = new THREE.SphereGeometry(0.5, 32, 32);
         break;
       case 'cylinder':
         geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
@@ -244,7 +242,7 @@ function updateMainSolid() {
       geometry = new THREE.PlaneGeometry(currentSize * 1.5, currentSize * 1.5);
       break;
     case 'ring':
-      geometry = new THREE.RingGeometry(currentSize * 0.5, currentSize * 1, 32);
+      geometry = new THREE.RringGeometry(currentSize * 0.5, currentSize * 1, 32);
       break;
     case 'circle':
       geometry = new THREE.CircleGeometry(currentSize * 0.8, 32);
