@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Three.js Native Solids Viewer</title>
+  <title>Three.js All Solids Viewer</title>
   <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
@@ -64,52 +64,23 @@
   </div>
   <footer id="solidSelector">
     <div class="solid-row">
-      <!-- Platonic solids first -->
-      <div class="solid-wrapper" data-type="tetrahedron">
-        <canvas class="solid-preview" width="60" height="60"></canvas>
-        <span>Tetrahedron</span>
-      </div>
-      <div class="solid-wrapper" data-type="cube">
-        <canvas class="solid-preview" width="60" height="60"></canvas>
-        <span>Cube</span>
-      </div>
-      <div class="solid-wrapper" data-type="octahedron">
-        <canvas class="solid-preview" width="60" height="60"></canvas>
-        <span>Octahedron</span>
-      </div>
-      <div class="solid-wrapper" data-type="dodecahedron">
-        <canvas class="solid-preview" width="60" height="60"></canvas>
-        <span>Dodecahedron</span>
-      </div>
-      <div class="solid-wrapper" data-type="icosahedron">
-        <canvas class="solid-preview" width="60" height="60"></canvas>
-        <span>Icosahedron</span>
-      </div>
-      <!-- Other Three.js native solids -->
-      <div class="solid-wrapper" data-type="box">
-        <canvas class="solid-preview" width="60" height="60"></canvas>
-        <span>Box</span>
-      </div>
-      <div class="solid-wrapper" data-type="sphere">
-        <canvas class="solid-preview" width="60" height="60"></canvas>
-        <span>Sphere</span>
-      </div>
-      <div class="solid-wrapper" data-type="cylinder">
-        <canvas class="solid-preview" width="60" height="60"></canvas>
-        <span>Cylinder</span>
-      </div>
-      <div class="solid-wrapper" data-type="cone">
-        <canvas class="solid-preview" width="60" height="60"></canvas>
-        <span>Cone</span>
-      </div>
-      <div class="solid-wrapper" data-type="torus">
-        <canvas class="solid-preview" width="60" height="60"></canvas>
-        <span>Torus</span>
-      </div>
-      <div class="solid-wrapper" data-type="torusKnot">
-        <canvas class="solid-preview" width="60" height="60"></canvas>
-        <span>Torus Knot</span>
-      </div>
+      <!-- Platonic solids -->
+      <div class="solid-wrapper" data-type="tetrahedron"><canvas class="solid-preview" width="60" height="60"></canvas><span>Tetrahedron</span></div>
+      <div class="solid-wrapper" data-type="cube"><canvas class="solid-preview" width="60" height="60"></canvas><span>Cube</span></div>
+      <div class="solid-wrapper" data-type="octahedron"><canvas class="solid-preview" width="60" height="60"></canvas><span>Octahedron</span></div>
+      <div class="solid-wrapper" data-type="dodecahedron"><canvas class="solid-preview" width="60" height="60"></canvas><span>Dodecahedron</span></div>
+      <div class="solid-wrapper" data-type="icosahedron"><canvas class="solid-preview" width="60" height="60"></canvas><span>Icosahedron</span></div>
+      <!-- Other geometries -->
+      <div class="solid-wrapper" data-type="box"><canvas class="solid-preview" width="60" height="60"></canvas><span>Box</span></div>
+      <div class="solid-wrapper" data-type="sphere"><canvas class="solid-preview" width="60" height="60"></canvas><span>Sphere</span></div>
+      <div class="solid-wrapper" data-type="cylinder"><canvas class="solid-preview" width="60" height="60"></canvas><span>Cylinder</span></div>
+      <div class="solid-wrapper" data-type="cone"><canvas class="solid-preview" width="60" height="60"></canvas><span>Cone</span></div>
+      <div class="solid-wrapper" data-type="torus"><canvas class="solid-preview" width="60" height="60"></canvas><span>Torus</span></div>
+      <div class="solid-wrapper" data-type="torusKnot"><canvas class="solid-preview" width="60" height="60"></canvas><span>Torus Knot</span></div>
+      <div class="solid-wrapper" data-type="plane"><canvas class="solid-preview" width="60" height="60"></canvas><span>Plane</span></div>
+      <div class="solid-wrapper" data-type="ring"><canvas class="solid-preview" width="60" height="60"></canvas><span>Ring</span></div>
+      <div class="solid-wrapper" data-type="circle"><canvas class="solid-preview" width="60" height="60"></canvas><span>Circle</span></div>
+      <!-- Note: Capsule is not a built-in geometry in standard Three.js -->
     </div>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
