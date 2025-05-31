@@ -63,45 +63,53 @@
     <button id="hideInfoBtn" class="material-icons">close</button>
   </div>
   <footer id="solidSelector">
-    <div class="solid-wrapper" data-type="box">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Box</span>
-    </div>
-    <div class="solid-wrapper" data-type="sphere">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Sphere</span>
-    </div>
-    <div class="solid-wrapper" data-type="cylinder">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Cylinder</span>
-    </div>
-    <div class="solid-wrapper" data-type="cone">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Cone</span>
-    </div>
-    <div class="solid-wrapper" data-type="torus">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Torus</span>
-    </div>
-    <div class="solid-wrapper" data-type="torusKnot">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Torus Knot</span>
-    </div>
-    <div class="solid-wrapper" data-type="tetrahedron">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Tetrahedron</span>
-    </div>
-    <div class="solid-wrapper" data-type="octahedron">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Octahedron</span>
-    </div>
-    <div class="solid-wrapper" data-type="dodecahedron">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Dodecahedron</span>
-    </div>
-    <div class="solid-wrapper" data-type="icosahedron">
-      <canvas class="solid-preview" width="60" height="60"></canvas>
-      <span>Icosahedron</span>
+    <div class="solid-row">
+      <!-- Platonic solids first -->
+      <div class="solid-wrapper" data-type="tetrahedron">
+        <canvas class="solid-preview" width="60" height="60"></canvas>
+        <span>Tetrahedron</span>
+      </div>
+      <div class="solid-wrapper" data-type="cube">
+        <canvas class="solid-preview" width="60" height="60"></canvas>
+        <span>Cube</span>
+      </div>
+      <div class="solid-wrapper" data-type="octahedron">
+        <canvas class="solid-preview" width="60" height="60"></canvas>
+        <span>Octahedron</span>
+      </div>
+      <div class="solid-wrapper" data-type="dodecahedron">
+        <canvas class="solid-preview" width="60" height="60"></canvas>
+        <span>Dodecahedron</span>
+      </div>
+      <div class="solid-wrapper" data-type="icosahedron">
+        <canvas class="solid-preview" width="60" height="60"></canvas>
+        <span>Icosahedron</span>
+      </div>
+      <!-- Other Three.js native solids -->
+      <div class="solid-wrapper" data-type="box">
+        <canvas class="solid-preview" width="60" height="60"></canvas>
+        <span>Box</span>
+      </div>
+      <div class="solid-wrapper" data-type="sphere">
+        <canvas class="solid-preview" width="60" height="60"></canvas>
+        <span>Sphere</span>
+      </div>
+      <div class="solid-wrapper" data-type="cylinder">
+        <canvas class="solid-preview" width="60" height="60"></canvas>
+        <span>Cylinder</span>
+      </div>
+      <div class="solid-wrapper" data-type="cone">
+        <canvas class="solid-preview" width="60" height="60"></canvas>
+        <span>Cone</span>
+      </div>
+      <div class="solid-wrapper" data-type="torus">
+        <canvas class="solid-preview" width="60" height="60"></canvas>
+        <span>Torus</span>
+      </div>
+      <div class="solid-wrapper" data-type="torusKnot">
+        <canvas class="solid-preview" width="60" height="60"></canvas>
+        <span>Torus Knot</span>
+      </div>
     </div>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
